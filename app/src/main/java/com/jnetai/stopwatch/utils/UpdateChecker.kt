@@ -16,8 +16,8 @@ import java.net.URL
 object UpdateChecker {
 
     private const val TAG = "UpdateChecker"
-    private const val GITHUB_API_URL = "https://api.github.com/repos/jnetai/StopWatch/releases/latest"
-    private const val GITHUB_RELEASES_URL = "https://github.com/jnetai/StopWatch/releases"
+    private const val GITHUB_API_URL = "https://api.github.com/repos/jnetai-clawbot/StopWatch/releases/latest"
+    private const val GITHUB_RELEASES_URL = "https://github.com/jnetai-clawbot/StopWatch/releases"
     private const val CONNECT_TIMEOUT = 8000
     private const val READ_TIMEOUT = 8000
 
