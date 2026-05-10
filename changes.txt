@@ -1,0 +1,173 @@
+# StopWatch App - Changelog
+
+## Project Created: 2026-05-10
+
+### Initial Setup
+- Created project structure at /home/jay/Documents/Scripts/AI/openclaw/Job8/
+- Configured Gradle build system (settings.gradle, build.gradle, gradle.properties)
+- Set up app module with Android SDK 34, Kotlin 1.9.20
+- Configured release signing with existing keystore from password-vault
+
+### Features Implemented
+
+#### 1. Stopwatch Mode
+- Start/Pause/Resume with millisecond precision display (HH:MM:SS.CC)
+- Lap recording with timestamped lap history
+- Reset button clears all laps
+- Lap history displayed in a RecyclerView (most recent first)
+- State persistence across configuration changes
+
+#### 2. Countdown Timer (Egg Timer)
+- Hours, Minutes, Seconds input fields
+- Start/Pause/Resume controls
+- Reset to initial time
+- Auto-plays alarm when countdown reaches zero
+- Input fields hidden during countdown, shown on reset
+
+#### 3. Alarm Clock
+- Time picker for setting alarm hour/minute
+- Enable/disable toggle with Switch
+- Schedules using exact AlarmManager (with fallback)
+- Re-schedules daily after trigger
+- Boot receiver to reschedule alarms after reboot
+- Full-screen notification when ringing
+
+#### 4. Settings Page
+- Alarm volume slider (0-100%, default 85%)
+- Sound picker dialog - auto-detects all alarmN.mp3 files
+- Custom MP3 upload via file picker (auto-names as alarmN.mp3)
+- Vibrate on/off toggle
+- Background service toggle (foreground service for alarm)
+- About section linking to jnetai.com
+- Check for Updates - opens GitHub releases page
+- Reset all settings to defaults
+
+#### 5. About Page
+- App version from BuildConfig (v1.0.0 build 1)
+- Developer: JNetAI
+- Website: jnetai.com
+- GitHub releases link for update checking
+
+#### 6. Background Operation
+- AlarmForegroundService with wake lock for reliable alarm
+- Plays alarm sound and vibrates even when app is in background
+- Notification with stop action button
+- BootReceiver reschedules alarms after device reboot
+
+#### 7. Debug System
+- ErrorLogger with module-specific error codes
+- All errors logged with stack traces and timestamps
+- Error codes follow format: E-XXX-YYY
+- tryOrNull wrapper for safe execution
+
+### Build System
+- GitHub Actions workflow (.github/workflows/build.yml)
+- Builds release APK, signs with keystore
+- Uploads APK as artifact
+- Creates GitHub release on tag push
+- APK output in apk/ folder
+
+### Build Fixes
+- Fixed app/build.gradle: replaced `activity-compose` with `activity-ktx` (no Jetpack Compose used)
+- Release signing config now checks env vars first (KEYSTORE_PATH, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD), falls back to local keystore, then debug signing
+- Removed unused signing verification step from workflow
+- Workflow now passes KEYSTORE_PATH to Gradle for signing
+- Added .gitignore
+- Added apk/ folder for build output
+
+### Sound File Naming
+- Sound files follow `alarmN.mp3` pattern (e.g. alarm0.mp3, alarm1.mp3)
+- Default alarm: alarm0.mp3 at 85% volume
+- Auto-detect regex: `alarm\d+\.mp3`
+- Uploaded files auto-named as alarmN.mp3 with next available N
+- Default alarm sound: alarm0.mp3 (at 85% volume)
+- All settings persist via SharedPreferences
+- Background operation enabled by default
+- Vibrate enabled by default
+
+### Sound Files
+- Renamed existing alarm files to alarmN.mp3 pattern
+- alarm0.mp3 through alarm3.mp3 available
+- Custom upload creates alarm4+.mp3 automatically
+
+### Project Structure
+```
+Job8/
+├── .github/workflows/build.yml
+├── app/
+│   ├── build.gradle
+│   ├── proguard-rules.pro
+│   └── src/main/
+│       ├── AndroidManifest.xml
+│       ├── java/com/jnetai/stopwatch/
+│       │   ├── MainActivity.kt
+│       │   ├── StopWatchApplication.kt
+│       │   ├── fragments/
+│       │   │   ├── StopWatchFragment.kt
+│       │   │   ├── CountdownFragment.kt
+│       │   │   ├── AlarmFragment.kt
+│       │   │   └── adapters/
+│       │   │       ├── LapAdapter.kt
+│       │   │       └── ViewPagerAdapter.kt
+│       │   ├── models/
+│       │   │   └── LapEntry.kt
+│       │   ├── receiver/
+│       │   │   ├── AlarmReceiver.kt
+│       │   │   └── BootReceiver.kt
+│       │   ├── service/
+│       │   │   └── AlarmForegroundService.kt
+│       │   ├── settings/
+│       │   │   ├── SettingsActivity.kt
+│       │   │   └── AboutActivity.kt
+│       │   └── utils/
+│       │       ├── ErrorLogger.kt
+│       │       ├── SettingsManager.kt
+│       │       ├── SoundUtils.kt
+│       │       └── UpdateChecker.kt
+│       └── res/
+│           ├── drawable/
+│           ├── layout/
+│           ├── menu/
+│           ├── mipmap-anydpi-v26/
+│           └── values/
+├── gradle/
+│   └── wrapper/
+│       └── gradle-wrapper.properties
+├── gradlew
+├── build.gradle
+├── settings.gradle
+├── gradle.properties
+├── sounds/
+│   ├── alarm0.mp3
+│   ├── alarm1.mp3
+│   ├── alarm2.mp3
+│   └── alarm3.mp3
+├── Backup/ (do not modify)
+└── PROMPT.md (do not modify)
+```
+
+## Post-Build Fixes (2026-05-10)
+
+### `alerm` -> `alarm` Rename
+- Fixed all code references: `alerm` → `alarm` across all .kt, .xml, .yml, .txt files
+- SoundUtils regex pattern now matches `alarm\d+\.mp3`
+- Upload naming uses `alarm${nextNum}.mp3`
+
+### Hardcoded Path Fixes
+- `SoundUtils.getDefaultSoundPath()` now returns path relative to app's internal sounds directory instead of hardcoded `/home/jay/...`
+- `SettingsActivity` now uses `SoundUtils.getSoundsDir(this)` instead of hardcoded path
+- `CountdownFragment.playAlarm()` now uses `SoundUtils.getDefaultSoundPath(context)` as fallback
+- `AlarmReceiver` now uses `SoundUtils.getDefaultSoundPath(context)` as fallback
+
+### Bundled Default Sound
+- Created `app/src/main/res/raw/default_alarm.mp3` (copy of alarm0.mp3) as bundled resource
+- Sounds are stored in app's `filesDir/sounds/` directory at runtime
+
+### Gradle Wrapper
+- Generated `gradle/wrapper/gradle-wrapper.jar` for build compatibility
+
+### Custom Alarm Upload Feature Added
+- Settings activity supports uploading custom MP3 sounds via file picker
+- Auto-renames uploaded files to `alarmN.mp3` with next available number
+- Only MP3 files accepted via `audio/mpeg` MIME filter
+- Uploaded sounds immediately selectable from sound picker dialog
