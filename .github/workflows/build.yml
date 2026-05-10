@@ -34,15 +34,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
           api-level: 34
           build-tools: 34.0.0
           ndk-version: '25.2.9519653'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
       - name: Decode Keystore
         env:
@@ -64,20 +64,13 @@ jobs:
         run: |
           if [ -f keystore.jks ]; then
             echo "Using production keystore for signing"
-            echo "Keystore found at: $KEYSTORE_PATH"
           else
             echo "No keystore found - using debug signing"
             unset KEYSTORE_PATH
           fi
           
-          # Set version if provided via workflow dispatch
-          if [ -n "${{ github.event.inputs.version_name }}" ]; then
-            echo "Building version: ${{ github.event.inputs.version_name }}"
-          fi
-          
           # Build the release APK
-          chmod +x gradlew || true
-          ./gradlew assembleRelease --no-daemon --stacktrace || ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 || ./gradlew assembleDebug --no-daemon --stacktrace 2>&1
 
       - name: Rename APK with Version
         run: |
@@ -88,11 +81,10 @@ jobs:
             VERSION="${GITHUB_REF#refs/tags/v}"
           fi
           
-          # Find and rename the APK
           apk_path=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
           if [ -n "$apk_path" ]; then
             cp "$apk_path" "StopWatch-v${VERSION}.apk"
-            echo "APK renamed to: StopWatch-v${VERSION}.apk"
+            echo "APK renamed: StopWatch-v${VERSION}.apk"
             echo "APK_PATH=StopWatch-v${VERSION}.apk" >> $GITHUB_ENV
             echo "VERSION_NAME=v${VERSION}" >> $GITHUB_ENV
           fi
@@ -102,7 +94,6 @@ jobs:
           mkdir -p apk
           if [ -f "${{ env.APK_PATH }}" ]; then
             cp "${{ env.APK_PATH }}" apk/
-            echo "APK copied to apk folder"
           fi
 
       - name: Upload APK Artifact
