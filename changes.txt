@@ -207,3 +207,8 @@ Job8/
   - Added android:id to LinearLayout (ll_buttons), referenced that instead of @id/btn_lap
   - btn_lap is inside the LinearLayout, not at the ConstraintLayout level
 - Updated GitHub secrets with correct keystore credentials
+
+## Fix: correct keystore key password - 2026-05-11 10:45
+- Key password is same as store password (4daptBXz0Hp6z8kxcsDhvQVx), not JDJN1aB2inFi40FO9BHRdA0M
+- Fixed app/build.gradle hardcoded fallback keyPassword
+- Updated GitHub secret KEY_PASSWORD to match

@@ -41,7 +41,7 @@ android {
                     storeFile localKeystore
                     storePassword "4daptBXz0Hp6z8kxcsDhvQVx"
                     keyAlias "ciphervault"
-                    keyPassword "JDJN1aB2inFi40FO9BHRdA0M"
+                    keyPassword "4daptBXz0Hp6z8kxcsDhvQVx"
                 }
                 // If neither exists, release signing config stays null and build will use debug
             }
