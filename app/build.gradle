@@ -42,10 +42,8 @@ android {
                     storePassword "4daptBXz0Hp6z8kxcsDhvQVx"
                     keyAlias "ciphervault"
                     keyPassword "JDJN1aB2inFi40FO9BHRdA0M"
-                } else {
-                    // Fallback to debug signing for release builds too
-                    signingConfig signingConfigs.debug
                 }
+                // If neither exists, release signing config stays null and build will use debug
             }
         }
     }
@@ -54,7 +52,9 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            if (signingConfigs.hasProperty('release') && signingConfigs.release.storeFile != null) {
+                signingConfig signingConfigs.release
+            }
         }
         debug {
             debuggable true
