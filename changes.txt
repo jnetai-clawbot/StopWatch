@@ -201,3 +201,9 @@ Job8/
 - Renamed app/src/main/res/menu/main_menu.xml to menu_main.xml
 - Tagged v1.0.1 for fresh release build
 - Workflow triggered via git push v1.0.1 tag
+
+## Fix: NotSibling lint error, correct keystore secrets - 2026-05-11 10:30
+- Fixed ConstraintLayout NotSibling lint error in fragment_stopwatch.xml
+  - Added android:id to LinearLayout (ll_buttons), referenced that instead of @id/btn_lap
+  - btn_lap is inside the LinearLayout, not at the ConstraintLayout level
+- Updated GitHub secrets with correct keystore credentials
