@@ -100,8 +100,7 @@ class AlarmFragment : Fragment() {
         try {
             val timePickerDialog = TimePickerDialog(
                 requireContext(),
-                R.style.Theme_StopWatch_TimePicker,
-                { _, hourOfDay, minute ->
+                R.style.Theme_StopWatch_TimePicker,                { _, hourOfDay, minute ->
                     alarmHour = hourOfDay
                     alarmMinute = minute
                     val settings = SettingsManager.getInstance(requireContext())
