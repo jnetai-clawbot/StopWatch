@@ -14,6 +14,11 @@ on:
         required: false
         type: string
 
+permissions:
+  contents: write
+  actions: read
+  checks: read
+
 # Allow only one concurrent build
 concurrency:
   group: stopwatch-build-${{ github.ref }}
