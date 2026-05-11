@@ -19,7 +19,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.jnetai.stopwatch.R
-import com.jnetai.stopwatch.BuildConfig
 import com.jnetai.stopwatch.utils.ErrorLogger
 import com.jnetai.stopwatch.utils.SettingsManager
 import com.jnetai.stopwatch.utils.SoundUtils
@@ -300,7 +299,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun checkForUpdates() {
         Toast.makeText(this, "Checking for updates...", Toast.LENGTH_SHORT).show()
 
-        val currentVersion = BuildConfig.VERSION_NAME
+        val currentVersion = APP_VERSION
         val releaseUrl = com.jnetai.stopwatch.utils.UpdateChecker.getReleasesUrl()
 
         // Open web browser to GitHub releases page

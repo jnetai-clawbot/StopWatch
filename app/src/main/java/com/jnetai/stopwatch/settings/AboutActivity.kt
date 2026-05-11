@@ -8,9 +8,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.jnetai.stopwatch.R
-import com.jnetai.stopwatch.BuildConfig
 import com.jnetai.stopwatch.utils.ErrorLogger
 import com.jnetai.stopwatch.utils.UpdateChecker
+
+private const val APP_VERSION = "1.0.0"
+private const val APP_VERSION_CODE = 1
 
 /**
  * AboutActivity - Shows app information, developer details,
@@ -38,9 +40,9 @@ class AboutActivity : AppCompatActivity() {
             btnCheckUpdate = findViewById(R.id.btn_check_update)
             tvDeveloperName = findViewById(R.id.tv_developer_name)
 
-            // Set version from BuildConfig
-            val versionName = BuildConfig.VERSION_NAME
-            val versionCode = BuildConfig.VERSION_CODE
+            // Set version
+            val versionName = APP_VERSION
+            val versionCode = APP_VERSION_CODE
             tvVersion?.text = "v$versionName (build $versionCode)"
 
             // Developer info
