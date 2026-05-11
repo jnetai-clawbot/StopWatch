@@ -48,7 +48,6 @@
             android:exported="true"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
-            android:showOnLockScreen="true"
             android:showForAllUsers="true"
             android:theme="@style/Theme.StopWatch.Alarm"
             android:turnScreenOn="true" />

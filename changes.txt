@@ -186,3 +186,12 @@ Job8/
 - Added GitHub secrets: KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_PASSWORD, KEY_ALIAS
 - APK was only 1.2MB because sounds weren't bundled — now properly includes alarm1-3.mp3 (~900KB of sounds)
 
+
+## Fix: Build errors - $(date '+%Y-%m-%d %H:%M')
+- Fixed AndroidManifest.xml: removed invalid showOnLockScreen, added missing string resources (settings, about)
+- Added missing strings.xml entries for @string/settings and @string/about
+- Added missing style Theme.StopWatch.Alarm to themes.xml
+- Created missing AlarmAlertActivity.kt with layout (dismiss/snooze alarm screen)
+- Created missing activity_alarm_alert.xml layout
+- Fixed workflow: setup-android@v3 now uses correct inputs (packages list instead of deprecated api-level/build-tools)
+- APK should now include alarm1-3.mp3 sound files (~800KB total) via workflow build step

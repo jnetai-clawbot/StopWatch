@@ -42,8 +42,12 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: 34
-          build-tools: 34.0.0
+          cmdline-tools-version: "11076708"
+          accept-android-sdk-licenses: true
+          packages: |
+            platform-tools
+            platforms;android-34
+            build-tools;34.0.0
 
       - name: Bundle alarm sounds into APK resources
         run: |
@@ -63,7 +67,7 @@ jobs:
           done
           echo "Total sound files bundled: $((i - 1))"
           ls -la app/src/main/res/raw/
-
+          
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
