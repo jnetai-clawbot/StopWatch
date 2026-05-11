@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_dark"
+    android:padding="16dp">
+
+    <!-- Countdown Time Display -->
+    <TextView
+        android:id="@+id/tv_countdown_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:fontFamily="monospace"
+        android:text="00:00:00"
+        android:textColor="@color/text_primary"
+        android:textSize="52sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Time Input Fields -->
+    <LinearLayout
+        android:id="@+id/layout_time_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_countdown_time">
+
+        <!-- Hours -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/et_hours"
+                android:layout_width="80dp"
+                android:layout_height="60dp"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLength="2"
+                android:text="0"
+                android:textAlignment="center"
+                android:textColor="@color/text_primary"
+                android:textSize="24sp"
+                android:background="@drawable/edit_text_background" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Hours"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Separator -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text=":"
+            android:textColor="@color/text_secondary"
+            android:textSize="32sp" />
+
+        <!-- Minutes -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/et_minutes"
+                android:layout_width="80dp"
+                android:layout_height="60dp"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLength="2"
+                android:text="0"
+                android:textAlignment="center"
+                android:textColor="@color/text_primary"
+                android:textSize="24sp"
+                android:background="@drawable/edit_text_background" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Minutes"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Separator -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text=":"
+            android:textColor="@color/text_secondary"
+            android:textSize="32sp" />
+
+        <!-- Seconds -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/et_seconds"
+                android:layout_width="80dp"
+                android:layout_height="60dp"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLength="2"
+                android:text="0"
+                android:textAlignment="center"
+                android:textColor="@color/text_primary"
+                android:textSize="24sp"
+                android:background="@drawable/edit_text_background" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Seconds"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_countdown_stop_alarm"
+        style="@style/StopWatchButtonDanger"
+        android:layout_width="200dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="16dp"
+        android:text="🔇 Stop Alarm"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layout_time_input" />
+
+    <!-- Control Buttons -->
+    <LinearLayout
+        android:id="@+id/ll_countdown_controls"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_countdown_stop_alarm">
+
+        <Button
+            android:id="@+id/btn_countdown_start"
+            style="@style/StopWatchButtonPrimary"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="Start" />
+
+        <Button
+            android:id="@+id/btn_countdown_pause"
+            style="@style/StopWatchButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="Pause" />
+
+        <Button
+            android:id="@+id/btn_countdown_reset"
+            style="@style/StopWatchButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="Reset" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

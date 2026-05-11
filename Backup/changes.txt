@@ -1,0 +1,229 @@
+# StopWatch App - Changelog
+
+## Project Created: 2026-05-10
+
+### Initial Setup
+- Created project structure at /home/jay/Documents/Scripts/AI/openclaw/Job8/
+- Configured Gradle build system (settings.gradle, build.gradle, gradle.properties)
+- Set up app module with Android SDK 34, Kotlin 1.9.20
+- Configured release signing with existing keystore from password-vault
+
+### Features Implemented
+
+#### 1. Stopwatch Mode
+- Start/Pause/Resume with millisecond precision display (HH:MM:SS.CC)
+- Lap recording with timestamped lap history
+- Reset button clears all laps
+- Lap history displayed in a RecyclerView (most recent first)
+- State persistence across configuration changes
+
+#### 2. Countdown Timer (Egg Timer)
+- Hours, Minutes, Seconds input fields
+- Start/Pause/Resume controls
+- Reset to initial time
+- Auto-plays alarm when countdown reaches zero
+- Input fields hidden during countdown, shown on reset
+
+#### 3. Alarm Clock
+- Time picker for setting alarm hour/minute
+- Enable/disable toggle with Switch
+- Schedules using exact AlarmManager (with fallback)
+- Re-schedules daily after trigger
+- Boot receiver to reschedule alarms after reboot
+- Full-screen notification when ringing
+
+#### 4. Settings Page
+- Alarm volume slider (0-100%, default 85%)
+- Sound picker dialog - auto-detects all alarmN.mp3 files
+- Custom MP3 upload via file picker (auto-names as alarmN.mp3)
+- Vibrate on/off toggle
+- Background service toggle (foreground service for alarm)
+- About section linking to jnetai.com
+- Check for Updates - opens GitHub releases page
+- Reset all settings to defaults
+
+#### 5. About Page
+- App version from BuildConfig (v1.0.0 build 1)
+- Developer: JNetAI
+- Website: jnetai.com
+- GitHub releases link for update checking
+
+#### 6. Background Operation
+- AlarmForegroundService with wake lock for reliable alarm
+- Plays alarm sound and vibrates even when app is in background
+- Notification with stop action button
+- BootReceiver reschedules alarms after device reboot
+
+#### 7. Debug System
+- ErrorLogger with module-specific error codes
+- All errors logged with stack traces and timestamps
+- Error codes follow format: E-XXX-YYY
+- tryOrNull wrapper for safe execution
+
+### Build System
+- GitHub Actions workflow (.github/workflows/build.yml)
+- Builds release APK, signs with keystore
+- Uploads APK as artifact
+- Creates GitHub release on tag push
+- APK output in apk/ folder
+
+### Build Fixes
+- Fixed app/build.gradle: replaced `activity-compose` with `activity-ktx` (no Jetpack Compose used)
+- Release signing config now checks env vars first (KEYSTORE_PATH, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD), falls back to local keystore, then debug signing
+- Removed unused signing verification step from workflow
+- Workflow now passes KEYSTORE_PATH to Gradle for signing
+- Added .gitignore
+- Added apk/ folder for build output
+
+### Sound File Naming
+- Sound files follow `alarmN.mp3` pattern (e.g. alarm0.mp3, alarm1.mp3)
+- Default alarm: alarm0.mp3 at 85% volume
+- Auto-detect regex: `alarm\d+\.mp3`
+- Uploaded files auto-named as alarmN.mp3 with next available N
+- Default alarm sound: alarm0.mp3 (at 85% volume)
+- All settings persist via SharedPreferences
+- Background operation enabled by default
+- Vibrate enabled by default
+
+### Sound Files
+- Renamed existing alarm files to alarmN.mp3 pattern
+- alarm0.mp3 through alarm3.mp3 available
+- Custom upload creates alarm4+.mp3 automatically
+
+### Project Structure
+```
+Job8/
+├── .github/workflows/build.yml
+├── app/
+│   ├── build.gradle
+│   ├── proguard-rules.pro
+│   └── src/main/
+│       ├── AndroidManifest.xml
+│       ├── java/com/jnetai/stopwatch/
+│       │   ├── MainActivity.kt
+│       │   ├── StopWatchApplication.kt
+│       │   ├── fragments/
+│       │   │   ├── StopWatchFragment.kt
+│       │   │   ├── CountdownFragment.kt
+│       │   │   ├── AlarmFragment.kt
+│       │   │   └── adapters/
+│       │   │       ├── LapAdapter.kt
+│       │   │       └── ViewPagerAdapter.kt
+│       │   ├── models/
+│       │   │   └── LapEntry.kt
+│       │   ├── receiver/
+│       │   │   ├── AlarmReceiver.kt
+│       │   │   └── BootReceiver.kt
+│       │   ├── service/
+│       │   │   └── AlarmForegroundService.kt
+│       │   ├── settings/
+│       │   │   ├── SettingsActivity.kt
+│       │   │   └── AboutActivity.kt
+│       │   └── utils/
+│       │       ├── ErrorLogger.kt
+│       │       ├── SettingsManager.kt
+│       │       ├── SoundUtils.kt
+│       │       └── UpdateChecker.kt
+│       └── res/
+│           ├── drawable/
+│           ├── layout/
+│           ├── menu/
+│           ├── mipmap-anydpi-v26/
+│           └── values/
+├── gradle/
+│   └── wrapper/
+│       └── gradle-wrapper.properties
+├── gradlew
+├── build.gradle
+├── settings.gradle
+├── gradle.properties
+├── sounds/
+│   ├── alarm0.mp3
+│   ├── alarm1.mp3
+│   ├── alarm2.mp3
+│   └── alarm3.mp3
+├── Backup/ (do not modify)
+└── PROMPT.md (do not modify)
+```
+
+## Post-Build Fixes (2026-05-10)
+
+### `alerm` -> `alarm` Rename
+- Fixed all code references: `alerm` → `alarm` across all .kt, .xml, .yml, .txt files
+- SoundUtils regex pattern now matches `alarm\d+\.mp3`
+- Upload naming uses `alarm${nextNum}.mp3`
+
+### Hardcoded Path Fixes
+- `SoundUtils.getDefaultSoundPath()` now returns path relative to app's internal sounds directory instead of hardcoded `/home/jay/...`
+- `SettingsActivity` now uses `SoundUtils.getSoundsDir(this)` instead of hardcoded path
+- `CountdownFragment.playAlarm()` now uses `SoundUtils.getDefaultSoundPath(context)` as fallback
+- `AlarmReceiver` now uses `SoundUtils.getDefaultSoundPath(context)` as fallback
+
+### Bundled Default Sound
+- Created `app/src/main/res/raw/default_alarm.mp3` (copy of alarm0.mp3) as bundled resource
+- Sounds are stored in app's `filesDir/sounds/` directory at runtime
+
+### Gradle Wrapper
+- Generated `gradle/wrapper/gradle-wrapper.jar` for build compatibility
+
+### Custom Alarm Upload Feature Added
+- Settings activity supports uploading custom MP3 sounds via file picker
+- Auto-renames uploaded files to `alarmN.mp3` with next available number
+- Only MP3 files accepted via `audio/mpeg` MIME filter
+- Uploaded sounds immediately selectable from sound picker dialog
+
+## Current Fixes Applied
+- **gradlew**: Replaced corrupted gradlew with clean copy from Gradle 8.5.0 (GitHub raw)
+- **gradle-wrapper.jar**: Rebuilt proper fat jar from Gradle 8.5 distribution (merged wrapper-plugin + wrapper-shared + cli)
+- **app/build.gradle**: Moved `signingConfigs` block before `buildTypes` block so signing configs are defined before they're referenced
+- **gradle-wrapper.properties**: Recreated clean
+
+
+## Fix: Bundle sounds and add copyDefaultSounds - 2026-05-11 09:18
+- Added missing copyDefaultSounds() function to SoundUtils.kt
+- Fixed workflow: bundle all sounds from sounds/ into res/raw/ at build time
+- Fixed workflow: KEYSTORE_PASSWORD secret reference syntax error
+- Added GitHub secrets: KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_PASSWORD, KEY_ALIAS
+- APK was only 1.2MB because sounds weren't bundled — now properly includes alarm1-3.mp3 (~900KB of sounds)
+
+
+## Fix: Build errors - $(date '+%Y-%m-%d %H:%M')
+- Fixed AndroidManifest.xml: removed invalid showOnLockScreen, added missing string resources (settings, about)
+- Added missing strings.xml entries for @string/settings and @string/about
+- Added missing style Theme.StopWatch.Alarm to themes.xml
+- Created missing AlarmAlertActivity.kt with layout (dismiss/snooze alarm screen)
+- Created missing activity_alarm_alert.xml layout
+- Fixed workflow: setup-android@v3 now uses correct inputs (packages list instead of deprecated api-level/build-tools)
+- APK should now include alarm1-3.mp3 sound files (~800KB total) via workflow build step
+
+## Fix: Rename main_menu.xml to menu_main.xml - 2026-05-11 10:22
+- Fixed Kotlin compilation error: menu_main.xml resource was named main_menu.xml but code referenced R.menu.menu_main
+- Renamed app/src/main/res/menu/main_menu.xml to menu_main.xml
+- Tagged v1.0.1 for fresh release build
+- Workflow triggered via git push v1.0.1 tag
+
+## Fix: NotSibling lint error, correct keystore secrets - 2026-05-11 10:30
+- Fixed ConstraintLayout NotSibling lint error in fragment_stopwatch.xml
+  - Added android:id to LinearLayout (ll_buttons), referenced that instead of @id/btn_lap
+  - btn_lap is inside the LinearLayout, not at the ConstraintLayout level
+- Updated GitHub secrets with correct keystore credentials
+
+## Fix: correct keystore key password - 2026-05-11 10:45
+- Key password is same as store password (4daptBXz0Hp6z8kxcsDhvQVx), not JDJN1aB2inFi40FO9BHRdA0M
+- Fixed app/build.gradle hardcoded fallback keyPassword
+- Updated GitHub secret KEY_PASSWORD to match
+
+## Fix: CountdownTimer default minutes 0 - 2026-05-11 11:40
+- Default minutes changed from 5 to 0 so entering 1 minute actually starts at 1 minute
+- restoreState only overrides EditText if a key exists in bundle (prevents wiping user input on fresh fragment creation)
+
+## Fix: Add Stop Alarm button to countdown, default minutes 0 - 2026-05-11 11:45
+- Added Stop Alarm button to countdown timer that appears when alarm is playing
+- Button uses danger style and shows 🔇 icon
+- Stops both sound and vibration, resets timer
+- Changed default minutes from 5 to 0 in both layout XML and fragment code
+
+## About section inline in Settings - 2026-05-11 12:15
+- Replaced separate About button with inline About section showing: Version, Developer (JNetAI), Website (jnetai.com)
+- Visit Website button opens jnetai.com in browser
+- Check for Updates button opens GitHub releases page

@@ -137,9 +137,17 @@ class AlarmReceiver : BroadcastReceiver() {
                 if (it == 0) 85 else it
             }
             val vibrate = settings.isVibrateEnabled()
+            val silentMode = settings.isSilentMode()
 
-            // Start foreground service to play alarm
-            AlarmForegroundService.startAlarm(context, soundPath, volume, vibrate)
+            // Start foreground service to play alarm (skip sound if silent mode)
+            if (silentMode) {
+                // Vibrate only in silent mode
+                if (vibrate) {
+                    SoundUtils.startVibrate(context)
+                }
+            } else {
+                AlarmForegroundService.startAlarm(context, soundPath, volume, vibrate)
+            }
 
             // Re-schedule for next day if it was a scheduled alarm
             if (settings.isAlarmEnabled()) {

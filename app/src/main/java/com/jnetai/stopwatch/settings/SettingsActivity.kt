@@ -24,8 +24,8 @@ import com.jnetai.stopwatch.utils.SettingsManager
 import com.jnetai.stopwatch.utils.SoundUtils
 import java.io.File
 
-const val APP_VERSION = "1.0.0"
-const val APP_VERSION_CODE = 1
+const val APP_VERSION = "1.0.1"
+const val APP_VERSION_CODE = 2
 
 /**
  * SettingsActivity - Settings page for the StopWatch app.
@@ -53,6 +53,8 @@ class SettingsActivity : AppCompatActivity() {
     private var tvAboutVersion: TextView? = null
     private var tvAboutSite: TextView? = null
     private var btnVisitSite: Button? = null
+    private var switchSilent: Switch? = null
+    private var btnShareApp: Button? = null
     private var btnUpdateCheck: Button? = null
     private var btnResetSettings: Button? = null
 
@@ -97,6 +99,8 @@ class SettingsActivity : AppCompatActivity() {
         tvAboutVersion = findViewById(R.id.tv_about_version)
         tvAboutSite = findViewById(R.id.tv_about_site)
         btnVisitSite = findViewById(R.id.btn_visit_site)
+        switchSilent = findViewById(R.id.switch_silent)
+        btnShareApp = findViewById(R.id.btn_share_app)
         btnUpdateCheck = findViewById(R.id.btn_update_check)
         btnResetSettings = findViewById(R.id.btn_reset_settings)
     }
@@ -114,6 +118,9 @@ class SettingsActivity : AppCompatActivity() {
 
             // Vibrate
             switchVibrate?.isChecked = settingsManager.isVibrateEnabled()
+
+            // Silent mode
+            switchSilent?.isChecked = settingsManager.isSilentMode()
 
             // Background service
             switchBackground?.isChecked = settingsManager.isBackgroundServiceEnabled()
@@ -182,6 +189,17 @@ class SettingsActivity : AppCompatActivity() {
         // About - Visit website
         btnVisitSite?.setOnClickListener {
             openWebsite("https://jnetai.com")
+        }
+
+        // Silent mode toggle
+        switchSilent?.setOnCheckedChangeListener { _, isChecked ->
+            settingsManager.setSilentMode(isChecked)
+            settingsManager.setLastUpdated()
+        }
+
+        // Share app
+        btnShareApp?.setOnClickListener {
+            shareApp()
         }
 
         // Update check
@@ -304,6 +322,21 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    private fun shareApp() {
+        try {
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_SUBJECT, "StopWatch App")
+                putExtra(Intent.EXTRA_TEXT,
+                    "Check out StopWatch – a feature-packed stopwatch, timer, and alarm app!\n" +
+                    "https://github.com/jnetai-clawbot/StopWatch/releases/latest")
+            }
+            startActivity(Intent.createChooser(shareIntent, "Share StopWatch via"))
+        } catch (e: Exception) {
+            ErrorLogger.log(ErrorLogger.Codes.GEN_UI_THREAD, "Failed to share app", e)
+        }
+    }
+
     private fun openWebsite(url: String) {
         try {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -354,6 +387,7 @@ class SettingsActivity : AppCompatActivity() {
             settingsManager.setAlarmSoundPath("")
             settingsManager.setAlarmSoundName("Default Alarm")
             settingsManager.setVibrateEnabled(true)
+            settingsManager.setSilentMode(false)
             settingsManager.setBackgroundServiceEnabled(true)
             settingsManager.setAlarmEnabled(false)
             settingsManager.setLastUpdated()
