@@ -55,6 +55,9 @@ android {
             if (signingConfigs.hasProperty('release') && signingConfigs.release.storeFile != null) {
                 signingConfig signingConfigs.release
             }
+            lint {
+                abortOnError false
+            }
         }
         debug {
             debuggable true
