@@ -32,6 +32,7 @@ class CountdownFragment : Fragment() {
     private var btnStart: Button? = null
     private var btnPause: Button? = null
     private var btnReset: Button? = null
+    private var btnStopAlarm: Button? = null
 
     private var countDownTimer: CountDownTimer? = null
     private var mediaPlayer: MediaPlayer? = null
@@ -58,6 +59,7 @@ class CountdownFragment : Fragment() {
             btnStart = view.findViewById(R.id.btn_countdown_start)
             btnPause = view.findViewById(R.id.btn_countdown_pause)
             btnReset = view.findViewById(R.id.btn_countdown_reset)
+            btnStopAlarm = view.findViewById(R.id.btn_countdown_stop_alarm)
 
             setupButtons()
             resetDisplay()
@@ -99,6 +101,12 @@ class CountdownFragment : Fragment() {
 
         btnReset?.setOnClickListener {
             resetCountdown()
+        }
+
+        btnStopAlarm?.setOnClickListener {
+            stopAlarm()
+            resetCountdown()
+            hideStopAlarmButton()
         }
     }
 
@@ -145,6 +153,7 @@ class CountdownFragment : Fragment() {
                     isRunning = false
                     tvCountdown?.text = "00:00:00"
                     playAlarm()
+                    showStopAlarmButton()
                     updateUI()
                 }
             }.start()
@@ -186,6 +195,7 @@ class CountdownFragment : Fragment() {
                     isRunning = false
                     tvCountdown?.text = "00:00:00"
                     playAlarm()
+                    showStopAlarmButton()
                     updateUI()
                 }
             }.start()
@@ -206,6 +216,9 @@ class CountdownFragment : Fragment() {
             isPaused = false
             timerFinished = false
             remainingMillis = initialMillis
+
+            // Hide stop alarm button
+            hideStopAlarmButton()
 
             // Stop any playing alarm
             stopAlarm()
@@ -251,6 +264,14 @@ class CountdownFragment : Fragment() {
         SoundUtils.stopVibrate(requireContext())
         SoundUtils.releaseMediaPlayer(mediaPlayer)
         mediaPlayer = null
+    }
+
+    private fun showStopAlarmButton() {
+        btnStopAlarm?.visibility = View.VISIBLE
+    }
+
+    private fun hideStopAlarmButton() {
+        btnStopAlarm?.visibility = View.GONE
     }
 
     private fun resetDisplay() {

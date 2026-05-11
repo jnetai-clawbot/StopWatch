@@ -216,3 +216,9 @@ Job8/
 ## Fix: CountdownTimer default minutes 0 - 2026-05-11 11:40
 - Default minutes changed from 5 to 0 so entering 1 minute actually starts at 1 minute
 - restoreState only overrides EditText if a key exists in bundle (prevents wiping user input on fresh fragment creation)
+
+## Fix: Add Stop Alarm button to countdown, default minutes 0 - 2026-05-11 11:45
+- Added Stop Alarm button to countdown timer that appears when alarm is playing
+- Button uses danger style and shows 🔇 icon
+- Stops both sound and vibration, resets timer
+- Changed default minutes from 5 to 0 in both layout XML and fragment code
