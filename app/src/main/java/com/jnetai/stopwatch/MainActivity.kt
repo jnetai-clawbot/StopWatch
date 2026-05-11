@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = when (position) {
                 0 -> getString(R.string.tab_stopwatch)
-                1 -> getString(R.string.tab_countdown)
+                1 -> getString(R.string.tab_timer)
                 2 -> getString(R.string.tab_alarm)
                 else -> ""
             }
