@@ -79,7 +79,7 @@ class StopWatchFragment : Fragment() {
 
     private fun setupButtons() {
         btnStart?.setOnClickListener {
-            if (!isRunning) {
+            if (!isRunning || isPaused) {
                 startStopwatch()
             } else {
                 pauseStopwatch()
@@ -100,9 +100,10 @@ class StopWatchFragment : Fragment() {
     private fun startStopwatch() {
         try {
             if (isPaused) {
-                // Resume from pause - adjust start time to account for pause duration
-                val pauseDuration = SystemClock.elapsedRealtime() - pausedTime
-                startTime += pauseDuration
+                // Resume from pause: accumulatedTime already holds the total elapsed
+                // before pause. Just reset startTime so (now - startTime) adds the
+                // post-resume portion correctly.
+                startTime = SystemClock.elapsedRealtime()
                 isPaused = false
             } else {
                 // Fresh start

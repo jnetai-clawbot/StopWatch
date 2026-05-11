@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/background_dark"
     android:orientation="vertical"
-    android:theme="@style/Theme.StopWatch"
     tools:context=".MainActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -15,11 +14,10 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/surface_dark"
         android:elevation="4dp"
+        android:layout_gravity="center"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:titleTextColor="@color/text_primary">
-
-    </androidx.appcompat.widget.Toolbar>
+        app:titleTextColor="@color/text_primary" />
 
     <!-- Main Content Area -->
     <LinearLayout

@@ -40,20 +40,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="v1.0.2"
+                android:text="v1.0.1"
                 android:textColor="@color/accent_cyan"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tv_update_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text=""
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp"
-                android:visibility="gone" />
 
             <View
                 android:layout_width="match_parent"
@@ -119,7 +109,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="12dp"
-                android:text="Check for Updates" />
+                android:text="View Releases on GitHub" />
 
         </LinearLayout>
     </ScrollView>

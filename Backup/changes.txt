@@ -227,3 +227,11 @@ Job8/
 - Replaced separate About button with inline About section showing: Version, Developer (JNetAI), Website (jnetai.com)
 - Visit Website button opens jnetai.com in browser
 - Check for Updates button opens GitHub releases page
+
+## v1.0.1 - Multiple fixes - 2026-05-11
+- Removed duplicate StopWatch title from toolbar (title comes from AndroidManifest)
+- Fixed stopwatch resume: reset startTime on resume instead of adjusting pause duration
+- Added About as 4th tab with version, developer, website, share, and releases link
+- Added silent mode toggle to Settings (no sound, vibrate only)
+- Added Share App button to Settings
+- Increased offscreenPageLimit to keep all tabs alive in background

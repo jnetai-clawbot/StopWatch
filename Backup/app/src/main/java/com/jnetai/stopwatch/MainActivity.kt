@@ -22,9 +22,12 @@ class MainActivity : AppCompatActivity() {
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(true)
-        supportActionBar?.title = getString(R.string.app_name)
+        // Title comes from AndroidManifest android:label — don't set it again
 
         viewPager = findViewById(R.id.view_pager)
+        // Keep all 4 fragments alive so timers/alarms continue when switching tabs
+        viewPager.offscreenPageLimit = 3
+
         tabLayout = findViewById(R.id.tab_layout)
 
         val adapter = ViewPagerAdapter(supportFragmentManager, lifecycle)
@@ -35,6 +38,7 @@ class MainActivity : AppCompatActivity() {
                 0 -> getString(R.string.tab_stopwatch)
                 1 -> getString(R.string.tab_timer)
                 2 -> getString(R.string.tab_alarm)
+                3 -> getString(R.string.tab_about)
                 else -> ""
             }
         }.attach()

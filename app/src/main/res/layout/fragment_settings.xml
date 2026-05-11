@@ -105,15 +105,23 @@
                     android:text="Select Sound" />
 
                 <Button
-                    android:id="@+id/btn_upload_sound"
+                    android:id="@+id/btn_preview_sound"
                     style="@style/StopWatchButton"
                     android:layout_width="0dp"
                     android:layout_height="48dp"
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
-                    android:text="Upload MP3" />
+                    android:text="Preview Sound" />
 
             </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_upload_sound"
+                style="@style/StopWatchButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="Upload MP3" />
 
             <!-- Vibrate Toggle -->
             <LinearLayout
@@ -190,110 +198,14 @@
 
             </LinearLayout>
 
-            <!-- Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="32dp"
-                android:background="@color/text_secondary" />
-
-            <!-- About Section -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="About"
-                android:textColor="@color/text_primary"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-            <!-- Version -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Version"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/tv_about_version"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="v1.0.0"
-                android:textColor="@color/accent_cyan"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <!-- Developer -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Developer"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="JNetAI"
-                android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <!-- Website -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Website"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/tv_about_site"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="jnetai.com"
-                android:textColor="@color/accent_cyan"
-                android:textSize="16sp" />
-
+            <!-- Save Settings Button -->
             <Button
-                android:id="@+id/btn_visit_site"
+                android:id="@+id/btn_save_settings"
                 style="@style/StopWatchButton"
-                android:layout_width="200dp"
-                android:layout_height="48dp"
-                android:layout_marginTop="8dp"
-                android:text="Visit Website" />
-
-            <!-- Check Update -->
-            <Button
-                android:id="@+id/btn_update_check"
-                style="@style/StopWatchButton"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="24dp"
-                android:text="Check for Updates on GitHub" />
-
-            <!-- Share App -->
-            <Button
-                android:id="@+id/btn_share_app"
-                style="@style/StopWatchButton"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="12dp"
-                android:text="Share App" />
-
-            <!-- Reset Settings -->
-            <Button
-                android:id="@+id/btn_reset_settings"
-                style="@style/StopWatchButtonDanger"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="32dp"
-                android:layout_marginBottom="24dp"
-                android:text="Reset All Settings" />
+                android:text="Save Settings" />
 
         </LinearLayout>
     </ScrollView>

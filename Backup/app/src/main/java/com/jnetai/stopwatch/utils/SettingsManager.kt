@@ -27,6 +27,7 @@ class SettingsManager private constructor(context: Context) {
         const val ALARM_ENABLED = "alarm_enabled"
         const val THEME_DARK = "theme_dark"
         const val BACKGROUND_SERVICE = "background_service"
+        const val SILENT_MODE = "silent_mode"
         const val SOUND_FILES_COUNT = "sound_files_count"
         const val LAST_UPDATED = "last_updated"
         const val PREVIOUS_APP_VERSION = "previous_app_version"
@@ -92,6 +93,15 @@ class SettingsManager private constructor(context: Context) {
     }
 
     fun isDarkTheme(): Boolean = prefs.getBoolean(Keys.THEME_DARK, true)
+
+    // --- Silent Mode ---
+    fun setSilentMode(enabled: Boolean) {
+        prefs.edit().putBoolean(Keys.SILENT_MODE, enabled).apply()
+    }
+
+    fun isSilentMode(): Boolean {
+        return prefs.getBoolean(Keys.SILENT_MODE, false)
+    }
 
     // --- Background Service ---
     fun setBackgroundServiceEnabled(enabled: Boolean) {

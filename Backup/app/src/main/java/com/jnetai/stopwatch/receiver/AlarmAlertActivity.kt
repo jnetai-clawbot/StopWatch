@@ -54,14 +54,18 @@ class AlarmAlertActivity : AppCompatActivity() {
             val soundPath = settingsManager.getAlarmSoundPath()
             val soundToPlay = if (soundPath.isNotEmpty()) soundPath
                 else SoundUtils.getDefaultSoundPath(this)
-
-            mediaPlayer = SoundUtils.createMediaPlayer(this, soundToPlay, volume)
-            mediaPlayer?.isLooping = true
-            mediaPlayer?.start()
+            val silentMode = settingsManager.isSilentMode()
 
             // Vibrate if enabled
             if (settingsManager.isVibrateEnabled()) {
                 SoundUtils.startVibrate(this)
+            }
+
+            // Play sound only if silent mode is off
+            if (!silentMode) {
+                mediaPlayer = SoundUtils.createMediaPlayer(this, soundToPlay, volume)
+                mediaPlayer?.isLooping = true
+                mediaPlayer?.start()
             }
         } catch (e: Exception) {
             ErrorLogger.log(ErrorLogger.Codes.ALM_SERVICE_FAILED, "Failed to play alarm sound", e)

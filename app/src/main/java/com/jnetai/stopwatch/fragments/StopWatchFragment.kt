@@ -21,6 +21,13 @@ import com.jnetai.stopwatch.fragments.adapters.LapAdapter
  * StopWatchFragment - Implements the stopwatch mode with start, stop,
  * lap, and reset functionality. Displays elapsed time with millisecond precision
  * and maintains a lap history list.
+ *
+ * Time tracking uses a simple two-variable approach:
+ *   - sessionStart: the SystemClock.elapsedRealtime() when the current
+ *     run segment began (reset on every Start or Resume).
+ *   - elapsedBeforePause: total millis accumulated before the last pause.
+ *     On a fresh start this is 0. On resume this holds the pre-pause total.
+ *   Current display = elapsedBeforePause + (now - sessionStart)
  */
 class StopWatchFragment : Fragment() {
 
@@ -32,14 +39,13 @@ class StopWatchFragment : Fragment() {
     private var lapAdapter: LapAdapter? = null
 
     private var handler: Handler? = null
-    private var startTime: Long = 0L
-    private var pausedTime: Long = 0L
+    private var sessionStart: Long = 0L
+    private var elapsedBeforePause: Long = 0L
     private var isRunning = false
     private var isPaused = false
     private var lapCount = 0
     private val laps = mutableListOf<LapEntry>()
     private var lastLapTime: Long = 0L
-    private var accumulatedTime: Long = 0L
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -97,24 +103,32 @@ class StopWatchFragment : Fragment() {
         }
     }
 
+    private fun currentElapsed(): Long {
+        return if (isRunning && !isPaused) {
+            elapsedBeforePause + (SystemClock.elapsedRealtime() - sessionStart)
+        } else {
+            elapsedBeforePause
+        }
+    }
+
     private fun startStopwatch() {
         try {
+            val now = SystemClock.elapsedRealtime()
+
             if (isPaused) {
-                // Resume from pause: accumulatedTime already holds the total elapsed
-                // before pause. Just reset startTime so (now - startTime) adds the
-                // post-resume portion correctly.
-                startTime = SystemClock.elapsedRealtime()
+                // Resume: keep elapsedBeforePause as-is, just reset sessionStart
+                // so that (now - sessionStart) adds the post-resume portion.
+                sessionStart = now
                 isPaused = false
             } else {
                 // Fresh start
-                startTime = SystemClock.elapsedRealtime()
-                accumulatedTime = 0L
+                sessionStart = now
+                elapsedBeforePause = 0L
                 lastLapTime = 0L
                 lapCount = 0
             }
 
             isRunning = true
-            isPaused = false
             updateTimer()
             updateUI()
 
@@ -126,10 +140,9 @@ class StopWatchFragment : Fragment() {
 
     private fun pauseStopwatch() {
         try {
+            // Add the current segment to accumulated
+            elapsedBeforePause += (SystemClock.elapsedRealtime() - sessionStart)
             isPaused = true
-            pausedTime = SystemClock.elapsedRealtime()
-            // Capture accumulated time so far
-            accumulatedTime += (pausedTime - startTime)
             handler?.removeCallbacksAndMessages(null)
             updateUI()
         } catch (e: Exception) {
@@ -143,9 +156,8 @@ class StopWatchFragment : Fragment() {
             handler?.removeCallbacksAndMessages(null)
             isRunning = false
             isPaused = false
-            startTime = 0L
-            pausedTime = 0L
-            accumulatedTime = 0L
+            sessionStart = 0L
+            elapsedBeforePause = 0L
             lastLapTime = 0L
             lapCount = 0
             laps.clear()
@@ -160,13 +172,7 @@ class StopWatchFragment : Fragment() {
 
     private fun recordLap() {
         try {
-            val now = SystemClock.elapsedRealtime()
-            val totalElapsed: Long
-            if (isPaused) {
-                totalElapsed = accumulatedTime
-            } else {
-                totalElapsed = accumulatedTime + (now - startTime)
-            }
+            val totalElapsed = currentElapsed()
 
             val lapElapsed = if (lastLapTime == 0L) {
                 totalElapsed
@@ -206,9 +212,7 @@ class StopWatchFragment : Fragment() {
 
     private fun updateDisplay() {
         try {
-            val now = SystemClock.elapsedRealtime()
-            val elapsed = accumulatedTime + (now - startTime)
-            tvTime?.text = formatTime(elapsed)
+            tvTime?.text = formatTime(currentElapsed())
         } catch (e: Exception) {
             ErrorLogger.log(ErrorLogger.Codes.SWP_START_FAILED,
                 "Failed to update timer display", e)
@@ -235,9 +239,8 @@ class StopWatchFragment : Fragment() {
         super.onSaveInstanceState(outState)
         outState.putBoolean("saved_running", isRunning)
         outState.putBoolean("saved_paused", isPaused)
-        outState.putLong("saved_start_time", startTime)
-        outState.putLong("saved_paused_time", pausedTime)
-        outState.putLong("saved_accumulated", accumulatedTime)
+        outState.putLong("saved_session_start", sessionStart)
+        outState.putLong("saved_elapsed_before_pause", elapsedBeforePause)
         outState.putSerializable("saved_laps", ArrayList(laps))
     }
 
@@ -245,9 +248,8 @@ class StopWatchFragment : Fragment() {
     private fun restoreState(savedInstanceState: Bundle) {
         isRunning = savedInstanceState.getBoolean("saved_running", false)
         isPaused = savedInstanceState.getBoolean("saved_paused", false)
-        startTime = savedInstanceState.getLong("saved_start_time", 0L)
-        pausedTime = savedInstanceState.getLong("saved_paused_time", 0L)
-        accumulatedTime = savedInstanceState.getLong("saved_accumulated", 0L)
+        sessionStart = savedInstanceState.getLong("saved_session_start", 0L)
+        elapsedBeforePause = savedInstanceState.getLong("saved_elapsed_before_pause", 0L)
 
         val savedLaps = savedInstanceState.getSerializable("saved_laps")
         if (savedLaps is ArrayList<*>) {

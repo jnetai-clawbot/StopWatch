@@ -228,10 +228,30 @@ Job8/
 - Visit Website button opens jnetai.com in browser
 - Check for Updates button opens GitHub releases page
 
-## v1.0.1 - Multiple fixes - 2026-05-11
-- Removed duplicate StopWatch title from toolbar (title comes from AndroidManifest)
-- Fixed stopwatch resume: reset startTime on resume instead of adjusting pause duration
+## v1.0.2 - Settings tab, version check, title centered, sound preview - 2026-05-11
+- Added Settings as 5th tab in ViewPager2 alongside Stopwatch, Timer, Alarm, About
+- Created SettingsFragment.kt with all settings controls: volume slider, sound selection, upload MP3, vibrate/silent/background toggles, and Save Settings button with toast
+- SettingsActivity remains accessible from toolbar menu (kept for backward compatibility)
+- Added explicit "Preview Sound" button in Settings tab that plays current sound at 30% volume
+- Sound picker auto-previews selected sound on confirm (same as SettingsActivity)
+- Added "Check for Updates" button in About tab: calls GitHub API releases/latest, compares tag_name against APP_VERSION, shows dialog with result
+- Uses HttpURLConnection on background thread, displays appropriate toast/dialog
+- Centered toolbar title with app:titleTextAlignment="center"
+- Bumped versionCode to 3 and versionName to "1.0.2" in app/build.gradle
+- Updated APP_VERSION to "1.0.2" in AboutFragment companion object
+- Updated APP_VERSION/APP_VERSION_CODE in SettingsActivity.kt
+- Added tab_settings string resource
+- Increased offscreenPageLimit to 4 to keep all 5 fragments alive
+- Updated fragment_about.xml: "View Releases" button changed to "Check for Updates"
+
+
+- Removed duplicate StopWatch title bar: removed android:theme from LinearLayout root in activity_main.xml which caused double-rendering of title
+- Fixed stopwatch resume: rewrote time tracking with cleaner sessionStart + elapsedBeforePause approach; pause now correctly snapshots elapsed and resume properly restarts the segment
 - Added About as 4th tab with version, developer, website, share, and releases link
 - Added silent mode toggle to Settings (no sound, vibrate only)
 - Added Share App button to Settings
 - Increased offscreenPageLimit to keep all tabs alive in background
+
+## Post-Audit Fixes - 2026-05-11 13:45
+- Fixed CountdownFragment: restart CountDownTimer on state restore when timer was actively running — prevents timer from stopping when ViewPager2 recycles the fragment after tab switch
+- Bumped versionCode to 2 and versionName to "1.0.1" in app/build.gradle

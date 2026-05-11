@@ -245,14 +245,18 @@ class CountdownFragment : Fragment() {
                 SoundUtils.getDefaultSoundPath(context)
             }
             val volume = settings.getAlarmVolume()
+            val silentMode = settings.isSilentMode()
 
             // Vibrate if enabled
             if (settings.isVibrateEnabled()) {
                 SoundUtils.startVibrate(context)
             }
 
-            mediaPlayer = SoundUtils.createMediaPlayer(context, soundPath, volume)
-            mediaPlayer?.start()
+            // Play sound only if silent mode is off
+            if (!silentMode) {
+                mediaPlayer = SoundUtils.createMediaPlayer(context, soundPath, volume)
+                mediaPlayer?.start()
+            }
 
         } catch (e: Exception) {
             ErrorLogger.log(ErrorLogger.Codes.ALM_TRIGGER_FAILED,

@@ -343,6 +343,30 @@ class CountdownFragment : Fragment() {
 
         if (timerFinished) {
             tvCountdown?.text = "00:00:00"
+            showStopAlarmButton()
+        } else if (isRunning && !isPaused && remainingMillis > 0) {
+            // Timer was running — restart the CountDownTimer
+            tvCountdown?.text = formatCountdownTime(remainingMillis)
+            // Hide inputs if timer was active
+            etHours?.visibility = View.GONE
+            etMinutes?.visibility = View.GONE
+            etSeconds?.visibility = View.GONE
+            // Restart the timer
+            countDownTimer = object : CountDownTimer(remainingMillis, 100) {
+                override fun onTick(millisUntilFinished: Long) {
+                    remainingMillis = millisUntilFinished
+                    tvCountdown?.text = formatCountdownTime(millisUntilFinished)
+                }
+
+                override fun onFinish() {
+                    timerFinished = true
+                    isRunning = false
+                    tvCountdown?.text = "00:00:00"
+                    playAlarm()
+                    showStopAlarmButton()
+                    updateUI()
+                }
+            }.start()
         } else if (isRunning || remainingMillis > 0) {
             tvCountdown?.text = formatCountdownTime(remainingMillis)
             // Hide inputs if timer was active

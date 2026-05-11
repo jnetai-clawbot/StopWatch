@@ -22,11 +22,16 @@ class MainActivity : AppCompatActivity() {
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(true)
+        // Center the title text
+        toolbar.setTitleMarginStart(0)
+        toolbar.setTitleMarginEnd(0)
+        toolbar.setContentInsetsAbsolute(0, 0)
+        toolbar.setContentInsetsRelative(0, 0)
         // Title comes from AndroidManifest android:label — don't set it again
 
         viewPager = findViewById(R.id.view_pager)
-        // Keep all 4 fragments alive so timers/alarms continue when switching tabs
-        viewPager.offscreenPageLimit = 3
+        // Keep all 5 fragments alive so timers/alarms continue when switching tabs
+        viewPager.offscreenPageLimit = 4
 
         tabLayout = findViewById(R.id.tab_layout)
 
@@ -39,6 +44,7 @@ class MainActivity : AppCompatActivity() {
                 1 -> getString(R.string.tab_timer)
                 2 -> getString(R.string.tab_alarm)
                 3 -> getString(R.string.tab_about)
+                4 -> getString(R.string.tab_settings)
                 else -> ""
             }
         }.attach()

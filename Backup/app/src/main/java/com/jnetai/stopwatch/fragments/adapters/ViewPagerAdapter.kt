@@ -6,7 +6,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 
 /**
- * ViewPagerAdapter - Manages the three main fragments (StopWatch, Countdown, Alarm)
+ * ViewPagerAdapter - Manages the four main fragments (StopWatch, Countdown, Alarm, About)
  * for swipe-based navigation between modes.
  */
 class ViewPagerAdapter(
@@ -14,13 +14,14 @@ class ViewPagerAdapter(
     lifecycle: Lifecycle
 ) : FragmentStateAdapter(fragmentManager, lifecycle) {
 
-    override fun getItemCount(): Int = 3
+    override fun getItemCount(): Int = 4
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
             0 -> com.jnetai.stopwatch.fragments.StopWatchFragment()
             1 -> com.jnetai.stopwatch.fragments.CountdownFragment()
             2 -> com.jnetai.stopwatch.fragments.AlarmFragment()
+            3 -> com.jnetai.stopwatch.fragments.AboutFragment()
             else -> throw IllegalArgumentException("Invalid position: $position")
         }
     }
@@ -33,6 +34,7 @@ class ViewPagerAdapter(
             0 -> "Stopwatch"
             1 -> "Timer"
             2 -> "Alarm"
+            3 -> "About"
             else -> ""
         }
     }
