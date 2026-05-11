@@ -195,3 +195,9 @@ Job8/
 - Created missing activity_alarm_alert.xml layout
 - Fixed workflow: setup-android@v3 now uses correct inputs (packages list instead of deprecated api-level/build-tools)
 - APK should now include alarm1-3.mp3 sound files (~800KB total) via workflow build step
+
+## Fix: Rename main_menu.xml to menu_main.xml - 2026-05-11 10:22
+- Fixed Kotlin compilation error: menu_main.xml resource was named main_menu.xml but code referenced R.menu.menu_main
+- Renamed app/src/main/res/menu/main_menu.xml to menu_main.xml
+- Tagged v1.0.1 for fresh release build
+- Workflow triggered via git push v1.0.1 tag
