@@ -62,10 +62,12 @@ class CountdownFragment : Fragment() {
             setupButtons()
             resetDisplay()
 
-            // Load default values
-            etHours?.setText("0")
-            etMinutes?.setText("5")
-            etSeconds?.setText("0")
+            // Load default values (only on first creation, not on restore)
+            if (savedInstanceState == null) {
+                etHours?.setText("0")
+                etMinutes?.setText("0")
+                etSeconds?.setText("0")
+            }
 
             if (savedInstanceState != null) {
                 restoreState(savedInstanceState)
@@ -304,9 +306,15 @@ class CountdownFragment : Fragment() {
         timerFinished = savedInstanceState.getBoolean("timer_finished", false)
 
         // Restore input text
-        etHours?.setText(savedInstanceState.getString("hours_text", "0"))
-        etMinutes?.setText(savedInstanceState.getString("minutes_text", "5"))
-        etSeconds?.setText(savedInstanceState.getString("seconds_text", "0"))
+        if (savedInstanceState.containsKey("hours_text")) {
+            etHours?.setText(savedInstanceState.getString("hours_text", "0"))
+        }
+        if (savedInstanceState.containsKey("minutes_text")) {
+            etMinutes?.setText(savedInstanceState.getString("minutes_text", "0"))
+        }
+        if (savedInstanceState.containsKey("seconds_text")) {
+            etSeconds?.setText(savedInstanceState.getString("seconds_text", "0"))
+        }
 
         if (timerFinished) {
             tvCountdown?.text = "00:00:00"

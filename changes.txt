@@ -212,3 +212,7 @@ Job8/
 - Key password is same as store password (4daptBXz0Hp6z8kxcsDhvQVx), not JDJN1aB2inFi40FO9BHRdA0M
 - Fixed app/build.gradle hardcoded fallback keyPassword
 - Updated GitHub secret KEY_PASSWORD to match
+
+## Fix: CountdownTimer default minutes 0 - 2026-05-11 11:40
+- Default minutes changed from 5 to 0 so entering 1 minute actually starts at 1 minute
+- restoreState only overrides EditText if a key exists in bundle (prevents wiping user input on fresh fragment creation)
