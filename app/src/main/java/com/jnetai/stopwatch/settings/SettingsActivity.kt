@@ -50,7 +50,9 @@ class SettingsActivity : AppCompatActivity() {
     private var btnUploadSound: Button? = null
     private var switchVibrate: Switch? = null
     private var switchBackground: Switch? = null
-    private var btnAbout: Button? = null
+    private var tvAboutVersion: TextView? = null
+    private var tvAboutSite: TextView? = null
+    private var btnVisitSite: Button? = null
     private var btnUpdateCheck: Button? = null
     private var btnResetSettings: Button? = null
 
@@ -92,7 +94,9 @@ class SettingsActivity : AppCompatActivity() {
         btnUploadSound = findViewById(R.id.btn_upload_sound)
         switchVibrate = findViewById(R.id.switch_vibrate)
         switchBackground = findViewById(R.id.switch_background)
-        btnAbout = findViewById(R.id.btn_about)
+        tvAboutVersion = findViewById(R.id.tv_about_version)
+        tvAboutSite = findViewById(R.id.tv_about_site)
+        btnVisitSite = findViewById(R.id.btn_visit_site)
         btnUpdateCheck = findViewById(R.id.btn_update_check)
         btnResetSettings = findViewById(R.id.btn_reset_settings)
     }
@@ -113,6 +117,12 @@ class SettingsActivity : AppCompatActivity() {
 
             // Background service
             switchBackground?.isChecked = settingsManager.isBackgroundServiceEnabled()
+
+            // About info
+            val versionName = APP_VERSION
+            val versionCode = APP_VERSION_CODE
+            tvAboutVersion?.text = "v$versionName (build $versionCode)"
+            tvAboutSite?.text = "jnetai.com"
 
         } catch (e: Exception) {
             ErrorLogger.log(ErrorLogger.Codes.SET_LOAD_FAILED,
@@ -169,9 +179,9 @@ class SettingsActivity : AppCompatActivity() {
                 "Background service %s", if (isChecked) "enabled" else "disabled")
         }
 
-        // About
-        btnAbout?.setOnClickListener {
-            openAbout()
+        // About - Visit website
+        btnVisitSite?.setOnClickListener {
+            openWebsite("https://jnetai.com")
         }
 
         // Update check
@@ -291,6 +301,17 @@ class SettingsActivity : AppCompatActivity() {
         } catch (e: Exception) {
             ErrorLogger.log(ErrorLogger.Codes.GEN_PERMISSION,
                 "Failed to test vibration", e)
+        }
+    }
+
+    private fun openWebsite(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        } catch (e: Exception) {
+            ErrorLogger.log(ErrorLogger.Codes.GEN_UI_THREAD,
+                "Failed to open website: %s", url, e)
+            Toast.makeText(this, "Unable to open browser", Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -222,3 +222,8 @@ Job8/
 - Button uses danger style and shows 🔇 icon
 - Stops both sound and vibration, resets timer
 - Changed default minutes from 5 to 0 in both layout XML and fragment code
+
+## About section inline in Settings - 2026-05-11 12:15
+- Replaced separate About button with inline About section showing: Version, Developer (JNetAI), Website (jnetai.com)
+- Visit Website button opens jnetai.com in browser
+- Check for Updates button opens GitHub releases page

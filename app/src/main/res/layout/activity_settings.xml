@@ -172,23 +172,84 @@
                 android:layout_marginTop="32dp"
                 android:background="@color/text_secondary" />
 
-            <!-- About Button -->
-            <Button
-                android:id="@+id/btn_about"
-                style="@style/StopWatchButton"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
+            <!-- About Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="About" />
+                android:text="About"
+                android:textColor="@color/text_primary"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
-            <!-- Check Update Button -->
+            <!-- Version -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Version"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tv_about_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="v1.0.0"
+                android:textColor="@color/accent_cyan"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- Developer -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Developer"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="JNetAI"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- Website -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Website"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tv_about_site"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="jnetai.com"
+                android:textColor="@color/accent_cyan"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btn_visit_site"
+                style="@style/StopWatchButton"
+                android:layout_width="200dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="Visit Website" />
+
+            <!-- Check Update -->
             <Button
                 android:id="@+id/btn_update_check"
                 style="@style/StopWatchButton"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginTop="12dp"
-                android:text="Check for Updates" />
+                android:layout_marginTop="24dp"
+                android:text="Check for Updates on GitHub" />
 
             <!-- Reset Settings -->
             <Button
