@@ -64,7 +64,7 @@ class AlarmAlertActivity : AppCompatActivity() {
                 SoundUtils.startVibrate(this)
             }
         } catch (e: Exception) {
-            ErrorLogger.log(ErrorLogger.Codes.SRV_ALARM_FAILED, "Failed to play alarm sound", e)
+            ErrorLogger.log(ErrorLogger.Codes.ALM_SERVICE_FAILED, "Failed to play alarm sound", e)
         }
     }
 
@@ -103,7 +103,7 @@ class AlarmAlertActivity : AppCompatActivity() {
             mediaPlayer = null
             SoundUtils.stopVibrate(this)
         } catch (e: Exception) {
-            ErrorLogger.log(ErrorLogger.Codes.SRV_ALARM_FAILED, "Error stopping alarm", e)
+            ErrorLogger.log(ErrorLogger.Codes.ALM_SERVICE_FAILED, "Error stopping alarm", e)
         }
 
         // Stop the foreground service
