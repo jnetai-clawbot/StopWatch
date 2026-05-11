@@ -8,11 +8,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.jnetai.stopwatch.R
+import com.jnetai.stopwatch.settings.APP_VERSION
+import com.jnetai.stopwatch.settings.APP_VERSION_CODE
 import com.jnetai.stopwatch.utils.ErrorLogger
 import com.jnetai.stopwatch.utils.UpdateChecker
-
-private const val APP_VERSION = "1.0.0"
-private const val APP_VERSION_CODE = 1
 
 /**
  * AboutActivity - Shows app information, developer details,

@@ -24,6 +24,8 @@ import com.jnetai.stopwatch.utils.SettingsManager
 import com.jnetai.stopwatch.utils.SoundUtils
 import java.io.File
 
+const val APP_VERSION = "1.0.0"
+
 /**
  * SettingsActivity - Settings page for the StopWatch app.
  * Provides controls for:
