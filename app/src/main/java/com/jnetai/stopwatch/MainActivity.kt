@@ -1,11 +1,13 @@
 package com.jnetai.stopwatch
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.jnetai.stopwatch.fragments.adapters.ViewPagerAdapter
+import com.jnetai.stopwatch.settings.SettingsActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,21 +24,10 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(true)
         supportActionBar?.title = getString(R.string.app_name)
 
-        toolbar.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.action_settings -> {
-                    settings.SettingsActivity.open(this)
-                    true
-                }
-                else -> false
-            }
-        }
-        toolbar.inflateMenu(R.menu.menu_main)
+        viewPager = findViewById(R.id.view_pager)
+        tabLayout = findViewById(R.id.tab_layout)
 
-        viewPager = findViewById(R.id.viewPager)
-        tabLayout = findViewById(R.id.tabLayout)
-
-        val adapter = ViewPagerAdapter(this)
+        val adapter = ViewPagerAdapter(supportFragmentManager, lifecycle)
         viewPager.adapter = adapter
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
@@ -48,7 +39,21 @@ class MainActivity : AppCompatActivity() {
             }
         }.attach()
 
+        setupToolbar()
         requestPermissions()
+    }
+
+    private fun setupToolbar() {
+        toolbar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_settings -> {
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                    true
+                }
+                else -> false
+            }
+        }
+        toolbar.inflateMenu(R.menu.menu_main)
     }
 
     private fun requestPermissions() {
