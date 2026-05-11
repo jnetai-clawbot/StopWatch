@@ -15,3 +15,6 @@ its already built but the release install issue needs resolving it only like 2.0
 the project instructions is /home/jay/Documents/Scripts/AI/openclaw/Job8/PROMPT.md
 
 the github https://github.com/jnetai-clawbot/StopWatch/
+
+
+
