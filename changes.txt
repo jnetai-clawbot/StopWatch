@@ -178,3 +178,11 @@ Job8/
 - **app/build.gradle**: Moved `signingConfigs` block before `buildTypes` block so signing configs are defined before they're referenced
 - **gradle-wrapper.properties**: Recreated clean
 
+
+## Fix: Bundle sounds and add copyDefaultSounds - 2026-05-11 09:18
+- Added missing copyDefaultSounds() function to SoundUtils.kt
+- Fixed workflow: bundle all sounds from sounds/ into res/raw/ at build time
+- Fixed workflow: KEYSTORE_PASSWORD secret reference syntax error
+- Added GitHub secrets: KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_PASSWORD, KEY_ALIAS
+- APK was only 1.2MB because sounds weren't bundled — now properly includes alarm1-3.mp3 (~900KB of sounds)
+

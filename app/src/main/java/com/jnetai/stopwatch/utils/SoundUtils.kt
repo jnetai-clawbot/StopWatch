@@ -239,9 +239,61 @@ object SoundUtils {
     }
 
     /**
-     * Get the sounds directory path.
-     * First checks the app's assets (bundled sounds), then app's external files dir.
+     * Copy default alarm sounds from bundled resources to app's sounds directory.
+     * Called once on first app launch.
      */
+    fun copyDefaultSounds(context: Context) {
+        try {
+            val soundsDir = getSoundsDir(context)
+            if (!soundsDir.exists()) {
+                soundsDir.mkdirs()
+            }
+
+            // Check if sounds already copied (use alarm0.mp3 as marker)
+            val markerFile = File(soundsDir, "alarm0.mp3")
+            if (markerFile.exists()) {
+                return
+            }
+
+            // Copy bundled default alarm from res/raw
+            val resId = context.resources.getIdentifier("default_alarm", "raw", context.packageName)
+            if (resId > 0) {
+                try {
+                    context.resources.openRawResource(resId).use { input ->
+                        FileOutputStream(markerFile).use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                    android.util.Log.i(TAG, "Copied default alarm sound: ${markerFile.absolutePath}")
+                } catch (e: Exception) {
+                    android.util.Log.e(TAG, "Failed to copy default alarm sound", e)
+                }
+            }
+
+            // Try copying alarm1-alarm9 from bundled raw resources
+            for (i in 1..9) {
+                val resName = "alarm_${i}"
+                val rawResId = context.resources.getIdentifier(resName, "raw", context.packageName)
+                if (rawResId > 0) {
+                    val destFile = File(soundsDir, "alarm${i}.mp3")
+                    try {
+                        context.resources.openRawResource(rawResId).use { input ->
+                            FileOutputStream(destFile).use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                        android.util.Log.i(TAG, "Copied bundled sound: alarm${i}.mp3 (${destFile.length()} bytes)")
+                    } catch (e: Exception) {
+                        android.util.Log.e(TAG, "Failed to copy alarm_${i}", e)
+                    }
+                }
+            }
+
+            android.util.Log.i(TAG, "Default sounds copied to: ${soundsDir.absolutePath}")
+        } catch (e: Exception) {
+            android.util.Log.e(TAG, "Failed to copy default sounds", e)
+        }
+    }
     fun getSoundsDir(context: Context): File {
         return File(context.filesDir, "sounds").also {
             if (!it.exists()) it.mkdirs()

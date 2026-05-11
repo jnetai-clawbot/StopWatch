@@ -44,7 +44,25 @@ jobs:
         with:
           api-level: 34
           build-tools: 34.0.0
-          ndk-version: '25.2.9519653'
+
+      - name: Bundle alarm sounds into APK resources
+        run: |
+          mkdir -p app/src/main/res/raw
+          # Copy all alarmN.mp3 from sounds/ into res/raw/ with proper resource names
+          # Resources named alarm_1, alarm_2 etc get referenced via R.raw.alarm_1
+          i=1
+          for f in sounds/alarm*.mp3; do
+            if [ -f "$f" ]; then
+              fname=$(basename "$f")
+              ext="${fname##*.}"
+              name="${fname%.*}"
+              echo "Bundling sound: $fname ($(stat -c%s "$f") bytes) -> app/src/main/res/raw/alarm_${i}.mp3"
+              cp "$f" "app/src/main/res/raw/alarm_${i}.${ext}"
+              i=$((i + 1))
+            fi
+          done
+          echo "Total sound files bundled: $((i - 1))"
+          ls -la app/src/main/res/raw/
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -69,15 +87,10 @@ jobs:
         run: |
           if [ -f keystore.jks ]; then
             echo "Using production keystore for signing"
+            ./gradlew assembleRelease --no-daemon --stacktrace
           else
-            echo "No keystore found - using debug signing"
-            unset KEYSTORE_PATH
-          fi
-          
-          # Build the release APK
-          ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 || true
-          if [ ! -f app/build/outputs/apk/release/*.apk ]; then
-            ./gradlew assembleDebug --no-daemon --stacktrace 2>&1
+            echo "No keystore found - building debug APK"
+            ./gradlew assembleDebug --no-daemon --stacktrace
           fi
 
       - name: Rename APK with Version
@@ -89,12 +102,20 @@ jobs:
             VERSION="${GITHUB_REF#refs/tags/v}"
           fi
           
-          apk_path=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
-          if [ -n "$apk_path" ]; then
-            cp "$apk_path" "StopWatch-v${VERSION}.apk"
-            echo "APK renamed: StopWatch-v${VERSION}.apk"
+          # Try release first, fall back to debug
+          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+            cp app/build/outputs/apk/release/app-release.apk "StopWatch-v${VERSION}.apk"
+          elif [ -f app/build/outputs/apk/debug/app-debug.apk ]; then
+            cp app/build/outputs/apk/debug/app-debug.apk "StopWatch-v${VERSION}.apk"
+          fi
+          
+          if [ -f "StopWatch-v${VERSION}.apk" ]; then
+            echo "APK renamed: StopWatch-v${VERSION}.apk ($(stat -c%s StopWatch-v${VERSION}.apk) bytes)"
             echo "APK_PATH=StopWatch-v${VERSION}.apk" >> $GITHUB_ENV
             echo "VERSION_NAME=v${VERSION}" >> $GITHUB_ENV
+          else
+            echo "ERROR: No APK found to rename!"
+            exit 1
           fi
 
       - name: Upload APK to apk folder
@@ -102,6 +123,7 @@ jobs:
           mkdir -p apk
           if [ -f "${{ env.APK_PATH }}" ]; then
             cp "${{ env.APK_PATH }}" apk/
+            ls -la apk/
           fi
 
       - name: Upload APK Artifact
@@ -120,15 +142,15 @@ jobs:
             ## StopWatch ${{ env.VERSION_NAME }}
             
             ### Features:
-            - Stopwatch with lap timer and pause/reset
-            - Countdown timer (hours, minutes, seconds)
-            - Alarm clock with scheduled alarms
-            - Custom alarm sound selection and MP3 upload
-            - Adjustable alarm volume
-            - Vibrate on/off toggle
-            - Background alarm support
-            - Dark theme interface
-            - All settings persist across app restarts
+            - ⏱️ **Stopwatch** with lap timer and pause/reset
+            - ⏳ **Countdown Timer** (hours, minutes, seconds)
+            - ⏰ **Alarm Clock** with scheduled alarms
+            - 🎵 **Custom alarm sound selection** and MP3 upload
+            - 🔊 **Adjustable alarm volume**
+            - 📳 **Vibrate on/off toggle**
+            - 🔙 **Background alarm support**
+            - 🎨 **Dark theme interface**
+            - 💾 **All settings persist across app restarts**
             
             ### Download:
             Download the APK from the assets below.
