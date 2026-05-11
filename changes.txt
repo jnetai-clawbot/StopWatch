@@ -255,3 +255,7 @@ Job8/
 ## Post-Audit Fixes - 2026-05-11 13:45
 - Fixed CountdownFragment: restart CountDownTimer on state restore when timer was actively running — prevents timer from stopping when ViewPager2 recycles the fragment after tab switch
 - Bumped versionCode to 2 and versionName to "1.0.1" in app/build.gradle
+
+## CRASH FIX: SwitchCompat type mismatch - 2026-05-11 17:06
+- All Switch view types changed from android.widget.Switch to SwitchCompat
+- Imported SwitchCompat in SettingsFragment and SettingsActivity

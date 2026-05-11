@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -37,9 +38,9 @@ class SettingsFragment : Fragment() {
     private var btnPickSound: Button? = null
     private var btnPreviewSound: Button? = null
     private var btnUploadSound: Button? = null
-    private var switchVibrate: Switch? = null
-    private var switchSilent: Switch? = null
-    private var switchBackground: Switch? = null
+    private var switchVibrate: SwitchCompat? = null
+    private var switchSilent: SwitchCompat? = null
+    private var switchBackground: SwitchCompat? = null
     private var btnSaveSettings: Button? = null
 
     // Sound picker dialog

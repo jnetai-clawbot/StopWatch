@@ -15,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -48,12 +49,12 @@ class SettingsActivity : AppCompatActivity() {
     private var tvCurrentSound: TextView? = null
     private var btnPickSound: Button? = null
     private var btnUploadSound: Button? = null
-    private var switchVibrate: Switch? = null
-    private var switchBackground: Switch? = null
+    private var switchVibrate: SwitchCompat? = null
+    private var switchBackground: SwitchCompat? = null
     private var tvAboutVersion: TextView? = null
     private var tvAboutSite: TextView? = null
     private var btnVisitSite: Button? = null
-    private var switchSilent: Switch? = null
+    private var switchSilent: SwitchCompat? = null
     private var btnShareApp: Button? = null
     private var btnUpdateCheck: Button? = null
     private var btnResetSettings: Button? = null
