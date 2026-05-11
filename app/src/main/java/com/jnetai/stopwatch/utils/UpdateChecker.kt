@@ -39,11 +39,13 @@ object UpdateChecker {
         }
 
         return ErrorLogger.tryOrNull(ErrorLogger.Codes.GEN_UPDATE_CHECK,
-            "Failed to check for updates") ?.let { result ->
-            result
-        } ?: run {
-            try {
-                val url = URL(GITHUB_API_URL)
+            "Failed to check for updates") {
+            checkForUpdateImpl(context)
+        } ?: UpdateInfo("", "", false, "Update check failed")
+    }
+
+    private fun checkForUpdateImpl(context: Context): UpdateInfo {
+        val url = URL(GITHUB_API_URL)
                 val connection = url.openConnection() as HttpURLConnection
                 connection.connectTimeout = CONNECT_TIMEOUT
                 connection.readTimeout = READ_TIMEOUT
@@ -81,7 +83,6 @@ object UpdateChecker {
                     "Network error: ${e.localizedMessage ?: "Unknown error"}")
             }
         }
-    }
 
     /**
      * Get the GitHub releases URL for manual checking.
