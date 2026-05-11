@@ -18,8 +18,7 @@
         <item name="android:editTextStyle">@style/StopWatchEditText</item>
         <item name="android:seekBarStyle">@style/StopWatchSeekBar</item>
         <item name="android:switchStyle">@style/StopWatchSwitch</item>
-        <item name="alertDialogTheme">@style/StopWatch_Dialog</item>
-        <item name="timePickerDialogTheme">@style/Theme.StopWatch_TimePicker</item>
+        <item name="alertDialogTheme">@style/Theme.StopWatch_Dialog</item>
     </style>
 
     <!-- Dialog theme -->
