@@ -171,3 +171,10 @@ Job8/
 - Auto-renames uploaded files to `alarmN.mp3` with next available number
 - Only MP3 files accepted via `audio/mpeg` MIME filter
 - Uploaded sounds immediately selectable from sound picker dialog
+
+## Current Fixes Applied
+- **gradlew**: Replaced corrupted gradlew with clean copy from Gradle 8.5.0 (GitHub raw)
+- **gradle-wrapper.jar**: Rebuilt proper fat jar from Gradle 8.5 distribution (merged wrapper-plugin + wrapper-shared + cli)
+- **app/build.gradle**: Moved `signingConfigs` block before `buildTypes` block so signing configs are defined before they're referenced
+- **gradle-wrapper.properties**: Recreated clean
+

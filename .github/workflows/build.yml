@@ -70,7 +70,10 @@ jobs:
           fi
           
           # Build the release APK
-          ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 || ./gradlew assembleDebug --no-daemon --stacktrace 2>&1
+          ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 || true
+          if [ ! -f app/build/outputs/apk/release/*.apk ]; then
+            ./gradlew assembleDebug --no-daemon --stacktrace 2>&1
+          fi
 
       - name: Rename APK with Version
         run: |

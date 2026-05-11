@@ -20,19 +20,6 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
-        }
-        debug {
-            debuggable true
-            minifyEnabled false
-            signingConfig signingConfigs.debug
-        }
-    }
-
     signingConfigs {
         debug {
             storeFile file("${rootProject.projectDir}/debug.keystore")
@@ -57,12 +44,22 @@ android {
                     keyPassword "JDJN1aB2inFi40FO9BHRdA0M"
                 } else {
                     // Fallback to debug signing for release builds too
-                    storeFile file("${rootProject.projectDir}/debug.keystore")
-                    storePassword "android"
-                    keyAlias "androiddebugkey"
-                    keyPassword "android"
+                    signingConfig signingConfigs.debug
                 }
             }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            debuggable true
+            minifyEnabled false
+            signingConfig signingConfigs.debug
         }
     }
 
