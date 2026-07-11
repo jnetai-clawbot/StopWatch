@@ -1,24 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary Colors -->
     <color name="background_dark">#FF121212</color>
     <color name="surface_dark">#FF1E1E1E</color>
     <color name="surface_card">#FF2A2A2A</color>
     <color name="surface_raised">#FF333333</color>
-
-    <!-- Text Colors -->
     <color name="text_primary">#FFE0E0E0</color>
     <color name="text_secondary">#FF9E9E9E</color>
     <color name="text_disabled">#FF616161</color>
-
-    <!-- Accent Colors -->
     <color name="accent_cyan">#FF00BCD4</color>
     <color name="accent_cyan_dark">#FF008494</color>
     <color name="accent_red">#FFE53935</color>
     <color name="accent_green">#FF43A047</color>
     <color name="accent_orange">#FFFF7043</color>
-
-    <!-- Button Colors -->
     <color name="button_primary">#FF00BCD4</color>
     <color name="button_primary_text">#FF121212</color>
     <color name="button_secondary">#FF333333</color>

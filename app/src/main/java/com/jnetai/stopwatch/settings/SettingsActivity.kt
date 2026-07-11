@@ -19,14 +19,12 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.jnetai.stopwatch.BuildConfig
 import com.jnetai.stopwatch.R
 import com.jnetai.stopwatch.utils.ErrorLogger
 import com.jnetai.stopwatch.utils.SettingsManager
 import com.jnetai.stopwatch.utils.SoundUtils
 import java.io.File
-
-const val APP_VERSION = "1.0.2"
-const val APP_VERSION_CODE = 3
 
 /**
  * SettingsActivity - Settings page for the StopWatch app.
@@ -127,9 +125,7 @@ class SettingsActivity : AppCompatActivity() {
             switchBackground?.isChecked = settingsManager.isBackgroundServiceEnabled()
 
             // About info
-            val versionName = APP_VERSION
-            val versionCode = APP_VERSION_CODE
-            tvAboutVersion?.text = "v$versionName (build $versionCode)"
+            tvAboutVersion?.text = "v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})"
             tvAboutSite?.text = "jnetai.com"
 
         } catch (e: Exception) {
@@ -356,8 +352,6 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun checkForUpdates() {
         Toast.makeText(this, "Checking for updates...", Toast.LENGTH_SHORT).show()
-
-        val currentVersion = APP_VERSION
         val releaseUrl = com.jnetai.stopwatch.utils.UpdateChecker.getReleasesUrl()
 
         // Open web browser to GitHub releases page

@@ -55,6 +55,15 @@
                 android:textSize="14sp"
                 android:visibility="gone" />
 
+            <Button
+                android:id="@+id/btn_open_release"
+                style="@style/StopWatchButtonPrimary"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:text="Open Latest Release"
+                android:visibility="gone" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

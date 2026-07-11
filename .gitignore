@@ -12,3 +12,6 @@ local.properties
 /app/release
 *.apk
 !apk/.gitkeep
+Backup/
+debug.keystore
+*.jks

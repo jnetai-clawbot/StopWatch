@@ -7,9 +7,8 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.jnetai.stopwatch.BuildConfig
 import com.jnetai.stopwatch.R
-import com.jnetai.stopwatch.settings.APP_VERSION
-import com.jnetai.stopwatch.settings.APP_VERSION_CODE
 import com.jnetai.stopwatch.utils.ErrorLogger
 import com.jnetai.stopwatch.utils.UpdateChecker
 
@@ -40,9 +39,7 @@ class AboutActivity : AppCompatActivity() {
             tvDeveloperName = findViewById(R.id.tv_developer_name)
 
             // Set version
-            val versionName = APP_VERSION
-            val versionCode = APP_VERSION_CODE
-            tvVersion?.text = "v$versionName (build $versionCode)"
+            tvVersion?.text = "v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})"
 
             // Developer info
             tvDeveloperName?.text = "JNetAI"
@@ -59,7 +56,7 @@ class AboutActivity : AppCompatActivity() {
             }
 
             ErrorLogger.log(ErrorLogger.Codes.GEN_UNEXPECTED,
-                "AboutActivity displayed (version %s)", versionName)
+                "AboutActivity displayed (version %s)", BuildConfig.VERSION_NAME)
 
         } catch (e: Exception) {
             ErrorLogger.log(ErrorLogger.Codes.GEN_UI_THREAD,

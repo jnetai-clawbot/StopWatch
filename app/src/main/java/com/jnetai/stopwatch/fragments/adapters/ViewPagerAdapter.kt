@@ -5,10 +5,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 
-/**
- * ViewPagerAdapter - Manages the five main fragments (StopWatch, Countdown, Alarm, About, Settings)
- * for swipe-based navigation between modes.
- */
 class ViewPagerAdapter(
     fragmentManager: FragmentManager,
     lifecycle: Lifecycle
@@ -24,20 +20,6 @@ class ViewPagerAdapter(
             3 -> com.jnetai.stopwatch.fragments.AboutFragment()
             4 -> com.jnetai.stopwatch.fragments.SettingsFragment()
             else -> throw IllegalArgumentException("Invalid position: $position")
-        }
-    }
-
-    /**
-     * Get the title for a given fragment position.
-     */
-    fun getPageTitle(position: Int): String {
-        return when (position) {
-            0 -> "Stopwatch"
-            1 -> "Timer"
-            2 -> "Alarm"
-            3 -> "About"
-            4 -> "Settings"
-            else -> ""
         }
     }
 }

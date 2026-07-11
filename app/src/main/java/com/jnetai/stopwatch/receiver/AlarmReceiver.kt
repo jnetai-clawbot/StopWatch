@@ -10,150 +10,123 @@ import com.jnetai.stopwatch.service.AlarmForegroundService
 import com.jnetai.stopwatch.utils.ErrorLogger
 import com.jnetai.stopwatch.utils.SettingsManager
 import com.jnetai.stopwatch.utils.SoundUtils
+import org.json.JSONArray
+import java.util.Calendar
 
-/**
- * AlarmReceiver - Receives system alarm broadcasts and starts the
- * AlarmForegroundService to play the alarm sound.
- */
 class AlarmReceiver : BroadcastReceiver() {
 
     companion object {
-        const val TAG = "AlarmReceiver"
         const val ACTION_ALARM_TRIGGERED = "com.jnetai.stopwatch.ALARM_TRIGGERED"
-        const val REQUEST_CODE_ALARM = 2001
         const val EXTRA_HOUR = "alarm_hour"
         const val EXTRA_MINUTE = "alarm_minute"
+        const val EXTRA_ALARM_ID = "alarm_id"
 
-        /**
-         * Schedule the alarm using AlarmManager.
-         */
-        fun scheduleAlarm(context: Context, hour: Int, minute: Int) {
+        fun scheduleAlarm(context: Context, id: Int, hour: Int, minute: Int) {
             try {
                 val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val settings = SettingsManager.getInstance(context)
+                val soundPath = settings.getAlarmSoundPath().ifEmpty {
+                    SoundUtils.getDefaultSoundPath(context)
+                }
+                val volume = settings.getAlarmVolume().coerceIn(0, 100).let { if (it == 0) 85 else it }
+                val vibrate = settings.isVibrateEnabled()
+
                 val intent = Intent(context, AlarmReceiver::class.java).apply {
                     action = ACTION_ALARM_TRIGGERED
                     putExtra(EXTRA_HOUR, hour)
                     putExtra(EXTRA_MINUTE, minute)
+                    putExtra(EXTRA_ALARM_ID, id)
+                    putExtra("sound_path", soundPath)
+                    putExtra("volume", volume)
+                    putExtra("vibrate", vibrate)
                 }
-                val pendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    REQUEST_CODE_ALARM,
-                    intent,
+                val pi = PendingIntent.getBroadcast(
+                    context, id, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
-                // Calculate trigger time
-                val calendar = java.util.Calendar.getInstance().apply {
-                    set(java.util.Calendar.HOUR_OF_DAY, hour)
-                    set(java.util.Calendar.MINUTE, minute)
-                    set(java.util.Calendar.SECOND, 0)
-                    set(java.util.Calendar.MILLISECOND, 0)
-
-                    // If the time is already past today, schedule for tomorrow
-                    if (before(java.util.Calendar.getInstance())) {
-                        add(java.util.Calendar.DAY_OF_YEAR, 1)
-                    }
+                val cal = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, hour)
+                    set(Calendar.MINUTE, minute)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                    if (before(Calendar.getInstance())) add(Calendar.DAY_OF_YEAR, 1)
                 }
 
-                val triggerTime = calendar.timeInMillis
-
-                // Schedule the alarm
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if (alarmManager.canScheduleExactAlarms()) {
-                        alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            triggerTime,
-                            pendingIntent
-                        )
-                    } else {
-                        alarmManager.setAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            triggerTime,
-                            pendingIntent
-                        )
-                    }
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        triggerTime,
-                        pendingIntent
+                        AlarmManager.RTC_WAKEUP, cal.timeInMillis, pi
                     )
                 } else {
-                    alarmManager.set(
-                        AlarmManager.RTC_WAKEUP,
-                        triggerTime,
-                        pendingIntent
-                    )
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pi)
                 }
-
-                ErrorLogger.log(ErrorLogger.Codes.GEN_UNEXPECTED,
-                    "Alarm scheduled for %02d:%02d (trigger: %s)",
-                    hour, minute, java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
-                        java.util.Locale.US).format(java.util.Date(triggerTime)))
-
             } catch (e: Exception) {
-                ErrorLogger.log(ErrorLogger.Codes.ALM_SCHEDULE_FAILED,
-                    "Failed to schedule alarm for %02d:%02d".format(hour, minute), e)
+                ErrorLogger.log(ErrorLogger.Codes.ALM_SCHEDULE_FAILED, "Failed to schedule alarm $id", e)
             }
         }
 
-        /**
-         * Cancel the scheduled alarm.
-         */
-        fun cancelAlarm(context: Context) {
+        fun cancelAlarm(context: Context, id: Int) {
             try {
                 val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
                 val intent = Intent(context, AlarmReceiver::class.java).apply {
                     action = ACTION_ALARM_TRIGGERED
                 }
-                val pendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    REQUEST_CODE_ALARM,
-                    intent,
+                val pi = PendingIntent.getBroadcast(
+                    context, id, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
-                alarmManager.cancel(pendingIntent)
-                pendingIntent.cancel()
-                ErrorLogger.log(ErrorLogger.Codes.GEN_UNEXPECTED,
-                    "Alarm cancelled")
+                alarmManager.cancel(pi)
+                pi.cancel()
             } catch (e: Exception) {
-                ErrorLogger.log(ErrorLogger.Codes.ALM_CANCEL_FAILED,
-                    "Failed to cancel alarm", e)
+                ErrorLogger.log(ErrorLogger.Codes.ALM_CANCEL_FAILED, "Failed to cancel alarm $id", e)
             }
         }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        ErrorLogger.log(ErrorLogger.Codes.GEN_UNEXPECTED,
-            "AlarmReceiver triggered with action: ${intent.action}")
+        val action = intent.action
+        ErrorLogger.log(ErrorLogger.Codes.GEN_UNEXPECTED, "AlarmReceiver: action=$action")
 
-        if (intent.action == ACTION_ALARM_TRIGGERED || intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            // Get settings
-            val settings = SettingsManager.getInstance(context)
-            val soundPath = settings.getAlarmSoundPath().ifEmpty {
-                SoundUtils.getDefaultSoundPath(context)
-            }
-            val volume = settings.getAlarmVolume().coerceIn(0, 100).let {
-                if (it == 0) 85 else it
-            }
-            val vibrate = settings.isVibrateEnabled()
-            val silentMode = settings.isSilentMode()
+        if (action == ACTION_ALARM_TRIGGERED || action == null) {
+            val soundPath = intent.getStringExtra("sound_path")
+                ?: SoundUtils.getDefaultSoundPath(context)
+            val volume = intent.getIntExtra("volume", 85)
+            val vibrate = intent.getBooleanExtra("vibrate", true)
+            val hour = intent.getIntExtra(EXTRA_HOUR, 0)
+            val minute = intent.getIntExtra(EXTRA_MINUTE, 0)
+            val id = intent.getIntExtra(EXTRA_ALARM_ID, 0)
 
-            // Start foreground service to play alarm (skip sound if silent mode)
-            if (silentMode) {
-                // Vibrate only in silent mode
-                if (vibrate) {
-                    SoundUtils.startVibrate(context)
+            AlarmForegroundService.startAlarm(context, soundPath, volume, vibrate)
+
+            try {
+                val alertIntent = Intent(context, AlarmAlertActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    putExtra("sound_path", soundPath)
+                    putExtra("volume", volume)
+                    putExtra("vibrate", vibrate)
+                    putExtra("alarm_hour", hour)
+                    putExtra("alarm_minute", minute)
+                    putExtra("alarm_id", id)
                 }
-            } else {
-                AlarmForegroundService.startAlarm(context, soundPath, volume, vibrate)
+                context.startActivity(alertIntent)
+            } catch (e: Exception) {
+                ErrorLogger.log(ErrorLogger.Codes.ALM_TRIGGER_FAILED,
+                    "Failed to start AlarmAlertActivity, service is running", e)
             }
 
-            // Re-schedule for next day if it was a scheduled alarm
-            if (settings.isAlarmEnabled()) {
-                val hour = intent.getIntExtra(EXTRA_HOUR, settings.getAlarmHour())
-                val minute = intent.getIntExtra(EXTRA_MINUTE, settings.getAlarmMinute())
-                scheduleAlarm(context, hour, minute)
+            val settings = SettingsManager.getInstance(context)
+            val json = settings.getAlarmsJson()
+            if (json.isNotEmpty()) {
+                try {
+                    val arr = JSONArray(json)
+                    for (i in 0 until arr.length()) {
+                        val obj = arr.getJSONObject(i)
+                        if (obj.optInt("id", 0) == id && obj.optBoolean("enabled", false)) {
+                            scheduleAlarm(context, id, hour, minute)
+                            break
+                        }
+                    }
+                } catch (_: Exception) {}
             }
         }
     }

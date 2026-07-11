@@ -8,28 +8,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.jnetai.stopwatch.BuildConfig
 import com.jnetai.stopwatch.R
 import com.jnetai.stopwatch.utils.ErrorLogger
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-/**
- * AboutFragment - About tab shown in the ViewPager2.
- * Displays app name, version, developer info, website link,
- * share button, and checks for updates via GitHub API.
- */
 class AboutFragment : Fragment() {
 
     private var btnShare: Button? = null
     private var btnCheckUpdates: Button? = null
+    private var btnOpenRelease: Button? = null
     private var tvVersion: TextView? = null
     private var tvUpdateStatus: TextView? = null
 
     companion object {
-        private const val APP_VERSION = "1.0.2"
         private const val GITHUB_RELEASES_URL = "https://github.com/jnetai-clawbot/StopWatch/releases/latest"
         private const val GITHUB_API_URL = "https://api.github.com/repos/jnetai-clawbot/StopWatch/releases/latest"
     }
@@ -47,21 +42,16 @@ class AboutFragment : Fragment() {
             tvVersion = view.findViewById(R.id.tv_about_version)
             btnShare = view.findViewById(R.id.btn_about_share)
             btnCheckUpdates = view.findViewById(R.id.btn_about_releases)
+            btnOpenRelease = view.findViewById(R.id.btn_open_release)
             tvUpdateStatus = view.findViewById(R.id.tv_update_status)
 
-            tvVersion?.text = "v$APP_VERSION"
+            tvVersion?.text = "v${BuildConfig.VERSION_NAME}"
 
-            btnShare?.setOnClickListener {
-                shareApp()
-            }
-
-            btnCheckUpdates?.setOnClickListener {
-                checkForUpdates()
-            }
-
+            btnShare?.setOnClickListener { shareApp() }
+            btnCheckUpdates?.setOnClickListener { checkForUpdates() }
+            btnOpenRelease?.setOnClickListener { openUrl(GITHUB_RELEASES_URL) }
         } catch (e: Exception) {
-            ErrorLogger.log(ErrorLogger.Codes.GEN_UI_THREAD,
-                "Failed to initialize AboutFragment", e)
+            ErrorLogger.log(ErrorLogger.Codes.GEN_UI_THREAD, "Failed to initialize AboutFragment", e)
         }
     }
 
@@ -75,8 +65,7 @@ class AboutFragment : Fragment() {
             }
             startActivity(Intent.createChooser(shareIntent, "Share StopWatch via"))
         } catch (e: Exception) {
-            ErrorLogger.log(ErrorLogger.Codes.GEN_UI_THREAD,
-                "Failed to share app", e)
+            ErrorLogger.log(ErrorLogger.Codes.GEN_UI_THREAD, "Failed to share app", e)
         }
     }
 
@@ -85,6 +74,7 @@ class AboutFragment : Fragment() {
         btnCheckUpdates?.text = "Checking..."
         tvUpdateStatus?.text = "Connecting to GitHub..."
         tvUpdateStatus?.visibility = View.VISIBLE
+        btnOpenRelease?.visibility = View.GONE
 
         Thread {
             try {
@@ -99,21 +89,18 @@ class AboutFragment : Fragment() {
                     val body = conn.inputStream.bufferedReader().readText()
                     val json = JSONObject(body)
                     val latestTag = json.optString("tag_name", "")
-                    val releaseName = json.optString("name", "")
 
                     requireActivity().runOnUiThread {
+                        val current = "v${BuildConfig.VERSION_NAME}"
                         if (latestTag.isNotEmpty()) {
-                            val current = "v$APP_VERSION"
                             if (latestTag == current) {
-                                tvUpdateStatus?.text = "✅ You're up to date ($latestTag)"
+                                tvUpdateStatus?.text = "You're up to date ($latestTag)"
                                 tvUpdateStatus?.setTextColor(0xFF00D4FF.toInt())
+                                btnOpenRelease?.visibility = View.GONE
                             } else {
-                                tvUpdateStatus?.text = "⬆️ $latestTag available! ($releaseName)"
+                                tvUpdateStatus?.text = "$latestTag available!"
                                 tvUpdateStatus?.setTextColor(0xFF4ADE80.toInt())
-                                // Make the releases button open the URL
-                                btnCheckUpdates?.setOnClickListener {
-                                    openUrl(GITHUB_RELEASES_URL)
-                                }
+                                btnOpenRelease?.visibility = View.VISIBLE
                             }
                             tvUpdateStatus?.visibility = View.VISIBLE
                         } else {
@@ -138,19 +125,16 @@ class AboutFragment : Fragment() {
                     btnCheckUpdates?.text = "Check for Updates"
                     btnCheckUpdates?.isEnabled = true
                 }
-                ErrorLogger.log(ErrorLogger.Codes.GEN_UPDATE_CHECK,
-                    "Failed to check for updates", e)
+                ErrorLogger.log(ErrorLogger.Codes.GEN_UPDATE_CHECK, "Failed to check for updates", e)
             }
         }.start()
     }
 
     private fun openUrl(url: String) {
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         } catch (e: Exception) {
-            ErrorLogger.log(ErrorLogger.Codes.GEN_UI_THREAD,
-                "Failed to open URL: $url", e)
+            ErrorLogger.log(ErrorLogger.Codes.GEN_UI_THREAD, "Failed to open URL: $url", e)
         }
     }
 }

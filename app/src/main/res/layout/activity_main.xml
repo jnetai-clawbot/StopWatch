@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_dark"
-    android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -14,12 +12,10 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/surface_dark"
         android:elevation="4dp"
-        android:layout_gravity="center"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:titleTextColor="@color/text_primary" />
 
-    <!-- Main Content Area -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -34,6 +30,7 @@
             app:tabIndicatorColor="@color/accent_cyan"
             app:tabIndicatorHeight="3dp"
             app:tabMode="fixed"
+            app:tabGravity="fill"
             app:tabSelectedTextColor="@color/accent_cyan"
             app:tabTextColor="@color/text_secondary"
             app:tabTextAppearance="@style/TabTextStyle" />

@@ -11,8 +11,8 @@ android {
         applicationId "com.jnetai.stopwatch"
         minSdk 26
         targetSdk 34
-        versionCode 3
-        versionName "1.0.2"
+        versionCode 16
+        versionName "1.0.16"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -35,15 +35,21 @@ android {
                 keyAlias System.getenv("KEY_ALIAS") ?: ""
                 keyPassword System.getenv("KEY_PASSWORD") ?: ""
             } else {
-                // Local development - try the password vault path
-                def localKeystore = file("/home/jay/Documents/Scripts/AI/openclaw/password-vault/ciphervault-release-keystore.jks")
+                def localKeystore = file("${rootProject.projectDir}/../stopwatch-keystore.jks")
                 if (localKeystore.exists()) {
                     storeFile localKeystore
                     storePassword "4daptBXz0Hp6z8kxcsDhvQVx"
                     keyAlias "ciphervault"
                     keyPassword "4daptBXz0Hp6z8kxcsDhvQVx"
+                } else {
+                    def vaultKeystore = file("/home/jay/Documents/Scripts/AI/openclaw/password-vault/ciphervault-release-keystore.jks")
+                    if (vaultKeystore.exists()) {
+                        storeFile vaultKeystore
+                        storePassword "4daptBXz0Hp6z8kxcsDhvQVx"
+                        keyAlias "ciphervault"
+                        keyPassword "4daptBXz0Hp6z8kxcsDhvQVx"
+                    }
                 }
-                // If neither exists, release signing config stays null and build will use debug
             }
         }
     }
@@ -75,6 +81,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
     packaging {
         resources {

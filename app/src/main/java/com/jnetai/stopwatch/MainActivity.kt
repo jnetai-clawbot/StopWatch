@@ -22,15 +22,8 @@ class MainActivity : AppCompatActivity() {
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(true)
-        // Center the title text
-        toolbar.setTitleMarginStart(0)
-        toolbar.setTitleMarginEnd(0)
-        toolbar.setContentInsetsAbsolute(0, 0)
-        toolbar.setContentInsetsRelative(0, 0)
-        // Title comes from AndroidManifest android:label — don't set it again
 
         viewPager = findViewById(R.id.view_pager)
-        // Keep all 5 fragments alive so timers/alarms continue when switching tabs
         viewPager.offscreenPageLimit = 4
 
         tabLayout = findViewById(R.id.tab_layout)
@@ -76,21 +69,6 @@ class MainActivity : AppCompatActivity() {
         }
         if (permissions.isNotEmpty()) {
             requestPermissions(permissions.toTypedArray(), 100)
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 100) {
-            for (i in permissions.indices) {
-                val permission = permissions[i]
-                val granted = grantResults[i] == android.content.pm.PackageManager.PERMISSION_GRANTED
-                android.util.Log.d("MainActivity", "Permission $permission: $granted")
-            }
         }
     }
 }

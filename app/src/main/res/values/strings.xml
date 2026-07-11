@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">StopWatch</string>
-    <string name="app_full_name">StopWatch Pro</string>
-    <string name="tab_stopwatch">Stopwatch</string>
+    <string name="tab_stopwatch">StopWatch</string>
     <string name="tab_timer">Timer</string>
     <string name="tab_alarm">Alarm</string>
     <string name="tab_about">About</string>

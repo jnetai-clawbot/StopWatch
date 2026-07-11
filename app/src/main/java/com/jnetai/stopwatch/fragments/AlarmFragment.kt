@@ -1,45 +1,36 @@
 package com.jnetai.stopwatch.fragments
 
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.app.TimePickerDialog
-import android.content.Context
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Switch
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import com.jnetai.stopwatch.R
 import com.jnetai.stopwatch.receiver.AlarmReceiver
-import com.jnetai.stopwatch.service.AlarmForegroundService
 import com.jnetai.stopwatch.utils.ErrorLogger
 import com.jnetai.stopwatch.utils.SettingsManager
-import com.jnetai.stopwatch.utils.SoundUtils
+import org.json.JSONArray
+import org.json.JSONObject
 import java.util.Calendar
+import java.util.concurrent.atomic.AtomicInteger
 
-/**
- * AlarmFragment - Implements the alarm clock mode.
- * Allows the user to set an alarm time, toggle it on/off,
- * and displays the current alarm status. Uses AlarmManager
- * for reliable system-level alarm scheduling.
- */
 class AlarmFragment : Fragment() {
 
-    private var tvAlarmTime: TextView? = null
-    private var tvAlarmStatus: TextView? = null
-    private var btnSetAlarm: Button? = null
-    private var switchAlarm: Switch? = null
-    private var btnStopAlarm: Button? = null
-
-    private var alarmHour: Int = 8
-    private var alarmMinute: Int = 0
-    private var alarmEnabled = false
-    private var isAlarmRinging = false
+    private var alarmsContainer: LinearLayout? = null
+    private var btnAddAlarm: Button? = null
+    private val alarms = mutableListOf<AlarmItem>()
+    private val countdownViews = mutableMapOf<Int, TextView>()
+    private val handler = Handler(Looper.getMainLooper())
+    private var tickRunnable: Runnable? = null
+    private var nextId = AtomicInteger(1000)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,182 +42,221 @@ class AlarmFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         try {
-            tvAlarmTime = view.findViewById(R.id.tv_alarm_time)
-            tvAlarmStatus = view.findViewById(R.id.tv_alarm_status)
-            btnSetAlarm = view.findViewById(R.id.btn_set_alarm)
-            switchAlarm = view.findViewById(R.id.switch_alarm)
-            btnStopAlarm = view.findViewById(R.id.btn_stop_alarm)
-
-            loadSettings()
-            setupButtons()
-            updateDisplay()
-
-            // Check if alarm is ringing from intent
-            val isAlarmActive = activity?.intent?.getBooleanExtra("alarm_active", false) ?: false
-            if (isAlarmActive) {
-                onAlarmTriggered()
-            }
-
+            alarmsContainer = view.findViewById(R.id.alarms_container)
+            btnAddAlarm = view.findViewById(R.id.btn_add_alarm)
+            loadAlarms()
+            btnAddAlarm?.setOnClickListener { addNewAlarm() }
+            startTicking()
         } catch (e: Exception) {
-            ErrorLogger.log(ErrorLogger.Codes.ALM_SET_FAILED,
-                "Failed to initialize Alarm view", e)
+            ErrorLogger.log(ErrorLogger.Codes.ALM_SET_FAILED, "Failed to initialize Alarm view", e)
         }
     }
 
-    private fun setupButtons() {
-        btnSetAlarm?.setOnClickListener {
-            showTimePicker()
+    private fun loadAlarms() {
+        val settings = SettingsManager.getInstance(requireContext())
+        val json = settings.getAlarmsJson()
+        alarms.clear()
+        var maxId = 999
+        if (json.isNotEmpty()) {
+            try {
+                val arr = JSONArray(json)
+                for (i in 0 until arr.length()) {
+                    val obj = arr.getJSONObject(i)
+                    val id = obj.optInt("id", 0)
+                    if (id > maxId) maxId = id
+                    alarms.add(AlarmItem(
+                        id = id,
+                        hour = obj.optInt("hour", 8),
+                        minute = obj.optInt("minute", 0),
+                        enabled = obj.optBoolean("enabled", false)
+                    ))
+                }
+            } catch (_: Exception) {}
+        }
+        if (alarms.isEmpty()) {
+            alarms.add(AlarmItem(id = 1000, hour = 8, minute = 0))
+            maxId = 1000
+        }
+        nextId.set(maxId + 1)
+        rebuildAlarmViews()
+    }
+
+    private fun saveAlarms() {
+        val arr = JSONArray()
+        for (a in alarms) {
+            arr.put(JSONObject().apply {
+                put("id", a.id)
+                put("hour", a.hour)
+                put("minute", a.minute)
+                put("enabled", a.enabled)
+            })
+        }
+        SettingsManager.getInstance(requireContext()).setAlarmsJson(arr.toString())
+    }
+
+    private fun rebuildAlarmViews() {
+        alarmsContainer?.removeAllViews()
+        countdownViews.clear()
+        for (alarm in alarms) {
+            val row = createAlarmRow(alarm)
+            alarmsContainer?.addView(row)
+        }
+    }
+
+    private fun createAlarmRow(alarm: AlarmItem): View {
+        val ctx = requireContext()
+        val row = LinearLayout(ctx).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = dpToPx(8) }
+            setPadding(dpToPx(10), dpToPx(8), dpToPx(10), dpToPx(8))
+            setBackgroundColor(0xFF1E1E1E.toInt())
+            gravity = android.view.Gravity.CENTER_VERTICAL
         }
 
-        switchAlarm?.setOnCheckedChangeListener { _, isChecked ->
-            alarmEnabled = isChecked
-            val settings = SettingsManager.getInstance(requireContext())
-            settings.setAlarmEnabled(isChecked)
+        val timeText = TextView(ctx).apply {
+            text = String.format("%02d:%02d", alarm.hour, alarm.minute)
+            textSize = 20f
+            setTextColor(0xFF00BCD4.toInt())
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setOnClickListener { showTimePicker(alarm) }
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.2f)
+        }
+        row.addView(timeText)
 
-            if (isChecked) {
-                scheduleAlarm()
-            } else {
-                cancelAlarm()
+        val countdownText = TextView(ctx).apply {
+            text = ""
+            textSize = 11f
+            setTextColor(0xFF9E9E9E.toInt())
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.8f)
+        }
+        row.addView(countdownText)
+        countdownViews[alarm.id] = countdownText
+
+        val switch = SwitchCompat(ctx).apply {
+            isChecked = alarm.enabled
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply { marginEnd = dpToPx(4) }
+            setOnCheckedChangeListener { _, checked ->
+                alarm.enabled = checked
+                if (checked) scheduleAlarm(alarm) else cancelAlarm(alarm)
+                saveAlarms()
+                updateCountdown(alarm, countdownText)
             }
-            updateDisplay()
         }
+        row.addView(switch)
 
-        btnStopAlarm?.setOnClickListener {
-            stopAlarm()
-        }
-    }
-
-    private fun showTimePicker() {
-        try {
-            val timePickerDialog = TimePickerDialog(
-                requireContext(),
-                R.style.Theme_StopWatch_TimePicker,                { _, hourOfDay, minute ->
-                    alarmHour = hourOfDay
-                    alarmMinute = minute
-                    val settings = SettingsManager.getInstance(requireContext())
-                    settings.setAlarmTime(hourOfDay, minute)
-
-                    if (alarmEnabled) {
-                        // Re-schedule with new time
-                        cancelAlarm()
-                        scheduleAlarm()
-                    }
-                    updateDisplay()
-                },
-                alarmHour,
-                alarmMinute,
-                true // 24-hour format
+        val deleteBtn = Button(ctx).apply {
+            text = "✕"
+            textSize = 12f
+            setTextColor(0xFFEF4444.toInt())
+            setBackgroundColor(0x00000000)
+            setPadding(dpToPx(4), 0, dpToPx(4), 0)
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
             )
+            setOnClickListener {
+                if (alarms.size <= 1) {
+                    Toast.makeText(ctx, "Cannot delete last alarm", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                cancelAlarm(alarm)
+                alarms.remove(alarm)
+                saveAlarms()
+                rebuildAlarmViews()
+            }
+        }
+        row.addView(deleteBtn)
 
-            // Apply dark theme programmatically if needed
-            timePickerDialog.show()
+        return row
+    }
 
-        } catch (e: Exception) {
-            ErrorLogger.log(ErrorLogger.Codes.ALM_SET_FAILED,
-                "Failed to show time picker", e)
+    private fun showTimePicker(alarm: AlarmItem) {
+        TimePickerDialog(
+            requireContext(),
+            R.style.Theme_StopWatch_TimePicker,
+            { _, h, m ->
+                cancelAlarm(alarm)
+                alarm.hour = h
+                alarm.minute = m
+                if (alarm.enabled) scheduleAlarm(alarm)
+                saveAlarms()
+                rebuildAlarmViews()
+            },
+            alarm.hour, alarm.minute, true
+        ).show()
+    }
+
+    private fun addNewAlarm() {
+        val id = nextId.getAndIncrement()
+        val alarm = AlarmItem(id = id, hour = 8, minute = 0)
+        alarms.add(alarm)
+        saveAlarms()
+        rebuildAlarmViews()
+    }
+
+    private fun scheduleAlarm(alarm: AlarmItem) {
+        AlarmReceiver.scheduleAlarm(requireContext().applicationContext, alarm.id, alarm.hour, alarm.minute)
+    }
+
+    private fun cancelAlarm(alarm: AlarmItem) {
+        AlarmReceiver.cancelAlarm(requireContext().applicationContext, alarm.id)
+    }
+
+    private fun startTicking() {
+        tickRunnable = object : Runnable {
+            override fun run() {
+                updateAllCountdowns()
+                handler.postDelayed(this, 1000)
+            }
+        }
+        handler.post(tickRunnable!!)
+    }
+
+    private fun updateAllCountdowns() {
+        for (alarm in alarms) {
+            val tv = countdownViews[alarm.id] ?: continue
+            updateCountdown(alarm, tv)
         }
     }
 
-    private fun scheduleAlarm() {
-        AlarmReceiver.scheduleAlarm(requireContext(), alarmHour, alarmMinute)
-        ErrorLogger.log(ErrorLogger.Codes.GEN_UNEXPECTED,
-            "Alarm scheduled: %02d:%02d", alarmHour, alarmMinute)
-    }
-
-    private fun cancelAlarm() {
-        AlarmReceiver.cancelAlarm(requireContext())
-    }
-
-    private fun stopAlarm() {
-        AlarmForegroundService.stopAlarm(requireContext())
-        SoundUtils.stopVibrate(requireContext())
-        isAlarmRinging = false
-        updateDisplay()
-    }
-
-    /**
-     * Called when the alarm is triggered (from the service or notification).
-     */
-    fun onAlarmTriggered() {
-        isAlarmRinging = true
-        updateDisplay()
-    }
-
-    private fun loadSettings() {
-        try {
-            val settings = SettingsManager.getInstance(requireContext())
-            alarmHour = settings.getAlarmHour()
-            alarmMinute = settings.getAlarmMinute()
-            alarmEnabled = settings.isAlarmEnabled()
-
-            ErrorLogger.log(ErrorLogger.Codes.GEN_UNEXPECTED,
-                "Alarm settings loaded: %02d:%02d enabled=%s",
-                alarmHour, alarmMinute, alarmEnabled)
-
-        } catch (e: Exception) {
-            ErrorLogger.log(ErrorLogger.Codes.SET_LOAD_FAILED,
-                "Failed to load alarm settings", e)
+    private fun updateCountdown(alarm: AlarmItem, tv: TextView) {
+        if (!alarm.enabled) {
+            tv.text = ""
+            return
         }
-    }
-
-    private fun updateDisplay() {
-        // Update alarm time display
-        val timeStr = String.format("%02d:%02d", alarmHour, alarmMinute)
-        tvAlarmTime?.text = timeStr
-
-        // Update switch state without triggering listener
-        switchAlarm?.setOnCheckedChangeListener(null)
-        switchAlarm?.isChecked = alarmEnabled
-        setupButtons() // Re-set listener
-
-        // Update status text
-        if (isAlarmRinging) {
-            tvAlarmStatus?.text = "🔔 ALARM RINGING!"
-            tvAlarmStatus?.visibility = View.VISIBLE
-            btnStopAlarm?.visibility = View.VISIBLE
-            btnSetAlarm?.isEnabled = false
-            switchAlarm?.isEnabled = false
-        } else if (alarmEnabled) {
-            tvAlarmStatus?.text = "Alarm set for $timeStr"
-            tvAlarmStatus?.visibility = View.VISIBLE
-            btnStopAlarm?.visibility = View.GONE
-            btnSetAlarm?.isEnabled = true
-            switchAlarm?.isEnabled = true
-        } else {
-            tvAlarmStatus?.visibility = View.GONE
-            btnStopAlarm?.visibility = View.GONE
-            btnSetAlarm?.isEnabled = true
-            switchAlarm?.isEnabled = true
+        val now = Calendar.getInstance()
+        val target = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, alarm.hour)
+            set(Calendar.MINUTE, alarm.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+            if (before(now)) add(Calendar.DAY_OF_YEAR, 1)
         }
+        val diffMs = target.timeInMillis - now.timeInMillis
+        if (diffMs <= 0) {
+            tv.text = "NOW"
+            return
+        }
+        val totalSecs = diffMs / 1000
+        val hours = totalSecs / 3600
+        val mins = (totalSecs % 3600) / 60
+        val secs = totalSecs % 60
+        tv.text = if (hours > 0) "${hours}h ${mins}m ${secs}s" else "${mins}m ${secs}s"
     }
+
+    private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
 
     override fun onResume() {
         super.onResume()
-        // Reload settings in case they changed while we were away
-        loadSettings()
-        updateDisplay()
+        loadAlarms()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt("alarm_hour", alarmHour)
-        outState.putInt("alarm_minute", alarmMinute)
-        outState.putBoolean("alarm_enabled", alarmEnabled)
-        outState.putBoolean("is_ringing", isAlarmRinging)
-    }
-
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
-        if (savedInstanceState != null) {
-            alarmHour = savedInstanceState.getInt("alarm_hour", 8)
-            alarmMinute = savedInstanceState.getInt("alarm_minute", 0)
-            alarmEnabled = savedInstanceState.getBoolean("alarm_enabled", false)
-            isAlarmRinging = savedInstanceState.getBoolean("is_ringing", false)
-            updateDisplay()
-        }
-    }
-
-    companion object {
-        private const val TAG = "AlarmFragment"
+    override fun onDestroyView() {
+        super.onDestroyView()
+        tickRunnable?.let { handler.removeCallbacks(it) }
     }
 }
