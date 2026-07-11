@@ -1,5 +1,6 @@
 package com.jnetai.stopwatch.service
 
+import android.app.AlarmManager
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
@@ -10,39 +11,42 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
-import com.jnetai.stopwatch.MainActivity
 import com.jnetai.stopwatch.R
 import com.jnetai.stopwatch.StopWatchApplication
+import com.jnetai.stopwatch.receiver.AlarmAlertActivity
 import com.jnetai.stopwatch.utils.ErrorLogger
 import com.jnetai.stopwatch.utils.SettingsManager
 import com.jnetai.stopwatch.utils.SoundUtils
 
-/**
- * AlarmForegroundService - Runs as a foreground service to play alarm sound
- * and vibrate even when the app is in the background or the phone is locked.
- * Acquires a wake lock to ensure the alarm sounds reliably.
- */
 class AlarmForegroundService : Service() {
 
     private var mediaPlayer: MediaPlayer? = null
     private var wakeLock: PowerManager.WakeLock? = null
+    private var alarmId: Int = 0
+    private var alarmHour: Int = 0
+    private var alarmMinute: Int = 0
 
     companion object {
         const val TAG = "AlarmService"
         const val NOTIFICATION_ID = 1001
         const val ACTION_STOP_ALARM = "com.jnetai.stopwatch.STOP_ALARM"
+        const val ACTION_SNOOZE_ALARM = "com.jnetai.stopwatch.SNOOZE_ALARM"
         const val EXTRA_SOUND_PATH = "sound_path"
         const val EXTRA_VOLUME = "volume"
         const val EXTRA_VIBRATE = "vibrate"
+        const val EXTRA_ALARM_ID = "alarm_id"
+        const val EXTRA_ALARM_HOUR = "alarm_hour"
+        const val EXTRA_ALARM_MINUTE = "alarm_minute"
 
-        /**
-         * Start the alarm foreground service.
-         */
-        fun startAlarm(context: Context, soundPath: String, volume: Int, vibrate: Boolean) {
+        fun startAlarm(context: Context, soundPath: String, volume: Int, vibrate: Boolean,
+                       id: Int = 0, hour: Int = 0, minute: Int = 0) {
             val intent = Intent(context, AlarmForegroundService::class.java).apply {
                 putExtra(EXTRA_SOUND_PATH, soundPath)
                 putExtra(EXTRA_VOLUME, volume)
                 putExtra(EXTRA_VIBRATE, vibrate)
+                putExtra(EXTRA_ALARM_ID, id)
+                putExtra(EXTRA_ALARM_HOUR, hour)
+                putExtra(EXTRA_ALARM_MINUTE, minute)
             }
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -57,9 +61,6 @@ class AlarmForegroundService : Service() {
             }
         }
 
-        /**
-         * Stop the alarm service from anywhere.
-         */
         fun stopAlarm(context: Context) {
             val intent = Intent(context, AlarmForegroundService::class.java)
             context.stopService(intent)
@@ -78,21 +79,24 @@ class AlarmForegroundService : Service() {
                 stopAlarmService()
                 return START_NOT_STICKY
             }
+            ACTION_SNOOZE_ALARM -> {
+                snoozeAlarm()
+                return START_NOT_STICKY
+            }
             else -> {
-                // Start the alarm
                 val soundPath = intent?.getStringExtra(EXTRA_SOUND_PATH) ?: ""
                 val volume = intent?.getIntExtra(EXTRA_VOLUME, 85) ?: 85
                 val vibrate = intent?.getBooleanExtra(EXTRA_VIBRATE, true) ?: true
+                alarmId = intent?.getIntExtra(EXTRA_ALARM_ID, 0) ?: 0
+                alarmHour = intent?.getIntExtra(EXTRA_ALARM_HOUR, 0) ?: 0
+                alarmMinute = intent?.getIntExtra(EXTRA_ALARM_MINUTE, 0) ?: 0
 
                 startForeground(NOTIFICATION_ID, createAlarmNotification())
 
-                // Acquire wake lock to ensure alarm plays
                 acquireWakeLock()
 
-                // Play sound
                 playAlarmSound(soundPath, volume)
 
-                // Vibrate if enabled
                 if (vibrate) {
                     SoundUtils.startVibrate(this)
                 }
@@ -118,12 +122,25 @@ class AlarmForegroundService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val openIntent = Intent(this, MainActivity::class.java).apply {
+        val snoozeIntent = Intent(this, AlarmForegroundService::class.java).apply {
+            action = ACTION_SNOOZE_ALARM
+        }
+        val snoozePendingIntent = PendingIntent.getService(
+            this, 1, snoozeIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val openIntent = Intent(this, AlarmAlertActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("alarm_active", true)
+            putExtra("sound_path", "")
+            putExtra("volume", 85)
+            putExtra("vibrate", true)
+            putExtra("alarm_hour", alarmHour)
+            putExtra("alarm_minute", alarmMinute)
+            putExtra("alarm_id", alarmId)
         }
         val openPendingIntent = PendingIntent.getActivity(
-            this, 1, openIntent,
+            this, 2, openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
@@ -135,6 +152,7 @@ class AlarmForegroundService : Service() {
             .setOngoing(true)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setFullScreenIntent(openPendingIntent, true)
+            .addAction(R.drawable.ic_stop, "Snooze 5 min", snoozePendingIntent)
             .addAction(R.drawable.ic_stop, "Stop", stopPendingIntent)
             .build()
     }
@@ -174,6 +192,43 @@ class AlarmForegroundService : Service() {
         mediaPlayer = null
         releaseWakeLock()
         stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
+
+    private fun snoozeAlarm() {
+        SoundUtils.stopVibrate(this)
+        SoundUtils.releaseMediaPlayer(mediaPlayer)
+        mediaPlayer = null
+        releaseWakeLock()
+        stopForeground(STOP_FOREGROUND_REMOVE)
+
+        val settings = SettingsManager.getInstance(this)
+        val sp = settings.getAlarmSoundPath().ifEmpty { SoundUtils.getDefaultSoundPath(this) }
+        val vol = settings.getAlarmVolume().coerceIn(0, 100).let { if (it == 0) 85 else it }
+        val vib = settings.isVibrateEnabled()
+
+        val intent = Intent(this, AlarmAlertActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            putExtra("sound_path", sp)
+            putExtra("volume", vol)
+            putExtra("vibrate", vib)
+            putExtra("alarm_hour", alarmHour)
+            putExtra("alarm_minute", alarmMinute)
+            putExtra("alarm_id", alarmId)
+        }
+        val pi = PendingIntent.getActivity(
+            this, alarmId, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val snoozeTime = System.currentTimeMillis() + 5 * 60 * 1000L
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP, snoozeTime, pi
+            )
+        } else {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, snoozeTime, pi)
+        }
         stopSelf()
     }
 

@@ -15,6 +15,7 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import com.jnetai.stopwatch.R
 import com.jnetai.stopwatch.receiver.AlarmReceiver
+import com.jnetai.stopwatch.service.AlarmForegroundService
 import com.jnetai.stopwatch.utils.ErrorLogger
 import com.jnetai.stopwatch.utils.SettingsManager
 import org.json.JSONArray
@@ -142,7 +143,12 @@ class AlarmFragment : Fragment() {
             ).apply { marginEnd = dpToPx(4) }
             setOnCheckedChangeListener { _, checked ->
                 alarm.enabled = checked
-                if (checked) scheduleAlarm(alarm) else cancelAlarm(alarm)
+                if (checked) {
+                    scheduleAlarm(alarm)
+                } else {
+                    cancelAlarm(alarm)
+                    AlarmForegroundService.stopAlarm(ctx)
+                }
                 saveAlarms()
                 updateCountdown(alarm, countdownText)
             }

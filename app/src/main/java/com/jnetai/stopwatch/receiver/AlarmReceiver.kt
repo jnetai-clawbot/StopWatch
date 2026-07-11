@@ -96,7 +96,7 @@ class AlarmReceiver : BroadcastReceiver() {
             val minute = intent.getIntExtra(EXTRA_MINUTE, 0)
             val id = intent.getIntExtra(EXTRA_ALARM_ID, 0)
 
-            AlarmForegroundService.startAlarm(context, soundPath, volume, vibrate)
+            AlarmForegroundService.startAlarm(context, soundPath, volume, vibrate, id, hour, minute)
 
             try {
                 val alertIntent = Intent(context, AlarmAlertActivity::class.java).apply {
